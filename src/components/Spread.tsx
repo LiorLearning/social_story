@@ -1,0 +1,685 @@
+import React, { useState, useCallback, useRef } from 'react';
+import { Mic, MicOff } from 'lucide-react';
+import { WordHighlighter } from './WordHighlighter';
+import { StoryPage } from '@/data/storyPages';
+import { speechRecognition, calculateReadingAccuracy, calculateWordAccuracies } from '@/lib/speechRecognition';
+
+interface SpreadProps {
+  page: StoryPage;
+  nextPage?: StoryPage;
+  isFlipping: boolean;
+  flipDirection: 'next' | 'prev';
+  highlightedWordIndex: number;
+  pageNumber: number;
+  totalPages: number;
+  readOnlyMode?: boolean;
+}
+
+export const Spread: React.FC<SpreadProps> = ({
+  page,
+  nextPage,
+  isFlipping,
+  flipDirection,
+  highlightedWordIndex,
+  pageNumber,
+  totalPages,
+  readOnlyMode = false
+}) => {
+  const [isListening, setIsListening] = useState(false);
+  const [isRecognitionActive, setIsRecognitionActive] = useState(false);
+  const [readingAccuracy, setReadingAccuracy] = useState<number | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('');
+  const [liveTranscript, setLiveTranscript] = useState<string>('');
+  const [wordAccuracies, setWordAccuracies] = useState<boolean[]>([]);
+  
+  // Use useRef to avoid stale closure issues
+  const accumulatedTranscriptRef = useRef('');
+  const [accumulatedTranscript, setAccumulatedTranscript] = useState<string>('');
+
+  const handleMicrophoneClick = useCallback(() => {
+    if (readOnlyMode) {
+      console.log('Microphone clicked in read-only mode');
+      return;
+    }
+
+    if (!speechRecognition.isAvailable()) {
+      setFeedbackMessage('Speech recognition not available in this browser');
+      return;
+    }
+
+    if (isListening) {
+      // User manually stopped - stop everything
+      speechRecognition.stop();
+      setIsListening(false);
+      setIsRecognitionActive(false);
+      setFeedbackMessage('Recording stopped. Click to start again.');
+      return;
+    }
+
+    // User started listening
+    setIsListening(true);
+    setIsRecognitionActive(true);
+    setReadingAccuracy(null);
+    setLiveTranscript('');
+    setWordAccuracies([]);
+    setFeedbackMessage('Listening... Please read the text aloud');
+
+    speechRecognition.start({
+      onInterimResult: (transcript) => {
+        setLiveTranscript(transcript);
+        // Use ref to get current accumulated transcript (avoid stale closure)
+        const currentAccumulated = accumulatedTranscriptRef.current;
+        const fullTranscript = currentAccumulated + (currentAccumulated ? ' ' : '') + transcript;
+        const accuracies = calculateWordAccuracies(fullTranscript, page.right.text);
+        setWordAccuracies(accuracies);
+      },
+      onResult: (result) => {
+        // Use ref to get current accumulated transcript
+        const currentAccumulated = accumulatedTranscriptRef.current;
+        const newAccumulated = currentAccumulated + (currentAccumulated ? ' ' : '') + result.transcript;
+        
+        // Update both ref and state
+        accumulatedTranscriptRef.current = newAccumulated;
+        setAccumulatedTranscript(newAccumulated);
+        setLiveTranscript(''); // Clear interim transcript
+        
+        // Calculate accuracy based on the full accumulated transcript
+        const accuracy = calculateReadingAccuracy(newAccumulated, page.right.text);
+        const wordAccuracies = calculateWordAccuracies(newAccumulated, page.right.text);
+        
+        setReadingAccuracy(accuracy);
+        setWordAccuracies(wordAccuracies);
+        
+        if (accuracy >= 80) {
+          setFeedbackMessage(`Great reading! Accuracy: ${Math.round(accuracy)}%`);
+        } else if (accuracy >= 60) {
+          setFeedbackMessage(`Good try! Accuracy: ${Math.round(accuracy)}%. Try again for better accuracy.`);
+        } else {
+          setFeedbackMessage(`Keep practicing! Accuracy: ${Math.round(accuracy)}%. Try reading more clearly.`);
+        }
+      },
+      onError: (error) => {
+        console.error('Speech recognition error:', error);
+        setFeedbackMessage(`Error: ${error}`);
+        setIsListening(false);
+        setIsRecognitionActive(false);
+        setLiveTranscript('');
+      },
+      onStart: () => {
+        console.log('Speech recognition started');
+        setIsRecognitionActive(true);
+        // Don't change isListening here - it's controlled by user clicks
+      },
+      onEnd: () => {
+        console.log('Speech recognition ended');
+        setIsRecognitionActive(false);
+        // Don't change isListening here - only user clicks should control it
+        // The continuous mode will handle auto-restart if user hasn't stopped manually
+      },
+      continuous: true, // Enable continuous listening
+      language: 'en-US'
+    });
+  }, [readOnlyMode, page.right.text]); // Removed isListening from dependencies
+
+  // Reset accumulated transcript when page changes
+  React.useEffect(() => {
+    accumulatedTranscriptRef.current = '';
+    setAccumulatedTranscript('');
+    setLiveTranscript('');
+    setWordAccuracies([]);
+    setReadingAccuracy(null);
+    setFeedbackMessage('');
+    setIsListening(false);
+    setIsRecognitionActive(false);
+    
+    // Stop any ongoing speech recognition
+    speechRecognition.stop();
+  }, [pageNumber]);
+
+  // Component to render text with word-by-word color feedback
+  const renderTextWithFeedback = (text: string, wordAccuracies: boolean[], isDropCap: boolean = false) => {
+    const words = text.split(' ');
+    
+    return (
+      <div>
+        {words.map((word, index) => {
+          const isFirstWord = index === 0 && isDropCap;
+          const accuracy = wordAccuracies[index];
+          const hasAccuracy = index < wordAccuracies.length;
+          
+          if (isFirstWord) {
+            return (
+              <React.Fragment key={index}>
+                <span
+                  style={{
+                    float: 'left',
+                    fontSize: '4.83em',
+                    lineHeight: '0.75',
+                    marginRight: '10px',
+                    marginTop: '8px',
+                    fontWeight: '500',
+                    fontFamily: '"Georgia", "Times New Roman", serif',
+                    color: hasAccuracy 
+                      ? accuracy 
+                        ? '#065F46' // Green for correct
+                        : '#991B1B' // Red for incorrect
+                      : '#2d3748' // Default color
+                  }}
+                >
+                  {word.charAt(0)}
+                </span>
+                <span
+                  style={{
+                    backgroundColor: hasAccuracy 
+                      ? accuracy 
+                        ? '#D1FAE5' // Light green background
+                        : '#FEE2E2' // Light red background
+                      : 'transparent',
+                    color: hasAccuracy 
+                      ? accuracy 
+                        ? '#065F46' // Dark green text
+                        : '#991B1B' // Dark red text
+                      : 'inherit',
+                    padding: hasAccuracy ? '2px 4px' : '0',
+                    borderRadius: hasAccuracy ? '4px' : '0',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {word.slice(1)}
+                </span>
+                {index < words.length - 1 && ' '}
+              </React.Fragment>
+            );
+          }
+          
+          return (
+            <React.Fragment key={index}>
+              <span
+                style={{
+                  backgroundColor: hasAccuracy 
+                    ? accuracy 
+                      ? '#D1FAE5' // Light green background
+                      : '#FEE2E2' // Light red background
+                    : 'transparent',
+                  color: hasAccuracy 
+                    ? accuracy 
+                      ? '#065F46' // Dark green text
+                      : '#991B1B' // Dark red text
+                    : 'inherit',
+                  padding: hasAccuracy ? '2px 4px' : '0',
+                  borderRadius: hasAccuracy ? '4px' : '0',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {word}
+              </span>
+              {index < words.length - 1 && ' '}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <div 
+      className="spread-container"
+      style={{
+        display: 'flex',
+        width: '100%',
+        height: '100%',
+        borderRadius: '20px',
+        overflow: 'visible',
+        position: 'relative',
+        transformStyle: 'preserve-3d'
+      }}
+    >
+      {/* Left Page - Illustration (Static) */}
+      <div 
+        className="left-page"
+        style={{
+          flex: '1',
+          position: 'relative',
+          background: '#1a1a1a',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '8px',
+          borderRadius: '20px 0 0 20px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          zIndex: 1,
+          minWidth: 0,
+          minHeight: 0,
+          overflow: 'hidden'
+        }}
+      >
+        <img
+          src={page.left.image}
+          alt={page.left.alt}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            borderRadius: '12px',
+            border: '2px solid white',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            display: 'block'
+          }}
+          loading="lazy"
+          onLoad={(e) => {
+            // Ensure image fills the container properly
+            const img = e.target as HTMLImageElement;
+            img.style.objectFit = 'cover';
+          }}
+        />
+      </div>
+
+      {/* Right Page Container - This is what flips */}
+      <div
+        className={`right-page-container ${isFlipping ? 'flipping' : ''}`}
+        style={{
+          flex: '1',
+          position: 'relative',
+          transformStyle: 'preserve-3d',
+          transformOrigin: 'left center',
+          transform: isFlipping 
+            ? flipDirection === 'next' 
+              ? 'rotateY(-180deg)' 
+              : 'rotateY(0deg)'
+            : 'rotateY(0deg)',
+          transition: isFlipping 
+            ? 'transform 650ms cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
+            : 'none',
+          zIndex: isFlipping ? 10 : 2
+        }}
+      >
+        {/* Current Right Page (Front Face) */}
+        <div 
+          className="right-page-front"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backfaceVisibility: 'hidden',
+            background: `
+              linear-gradient(135deg, #fafaf7 0%, #f8f8f5 100%),
+              url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0f0f0' fill-opacity='0.3'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3Ccircle cx='27' cy='27' r='1'/%3E%3Ccircle cx='47' cy='47' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+            `,
+            padding: '28px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            paddingTop: '35%',
+            boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            borderRadius: '0 20px 20px 0',
+            border: '1px solid rgba(0, 0, 0, 0.1)'
+          }}
+        >
+          {/* Page curl effect */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '0',
+              right: '0',
+              width: '20px',
+              height: '20px',
+              background: 'linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, 0.1) 50%)',
+              borderRadius: '0 0 20px 0'
+            }}
+          />
+
+          {/* Text content */}
+          <div 
+            style={{
+              fontFamily: '"Georgia", "Times New Roman", serif',
+              fontSize: '23px',
+              lineHeight: '1.7',
+              color: '#1a202c',
+              maxWidth: '38ch',
+              textAlign: 'center',
+              letterSpacing: '0.01em',
+              fontWeight: '400'
+            }}
+          >
+            {renderTextWithFeedback(page.right.text, wordAccuracies, page.right.dropCap)}
+          </div>
+
+          {/* Live Transcription Display */}
+          {(isListening || liveTranscript || accumulatedTranscript) && (
+            <div
+              style={{
+                marginTop: '20px',
+                padding: '12px 16px',
+                backgroundColor: '#F8FAFC',
+                border: '2px solid #E2E8F0',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontStyle: 'italic',
+                color: '#64748B',
+                maxWidth: '38ch',
+                textAlign: 'center'
+              }}
+            >
+              <div style={{ 
+                fontSize: '14px', 
+                fontWeight: '600', 
+                marginBottom: '8px', 
+                color: '#475569',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span>
+                  Transcription: 
+                  {isRecognitionActive && (
+                    <span style={{ color: '#3B82F6', marginLeft: '8px' }}>🎤 Recording...</span>
+                  )}
+                </span>
+                {accumulatedTranscript && (
+                  <button
+                    onClick={() => {
+                      accumulatedTranscriptRef.current = '';
+                      setAccumulatedTranscript('');
+                      setLiveTranscript('');
+                      setWordAccuracies([]);
+                      setReadingAccuracy(null);
+                      setFeedbackMessage('');
+                    }}
+                    style={{
+                      fontSize: '12px',
+                      padding: '2px 6px',
+                      backgroundColor: '#EF4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                    title="Clear transcription"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div>
+                {/* Show accumulated transcript in normal style */}
+                {accumulatedTranscript && (
+                  <span style={{ fontStyle: 'normal', color: '#374151' }}>
+                    {accumulatedTranscript}
+                  </span>
+                )}
+                {/* Show current live transcript in italic */}
+                {liveTranscript && (
+                  <span style={{ fontStyle: 'italic', color: '#64748B' }}>
+                    {accumulatedTranscript ? ' ' : ''}{liveTranscript}
+                  </span>
+                )}
+                {/* Show listening indicator if no transcript yet */}
+                {!accumulatedTranscript && !liveTranscript && isListening && 'Listening...'}
+              </div>
+            </div>
+          )}
+
+          {/* Microphone Button */}
+          <div style={{ marginTop: '30%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* Feedback Message */}
+            {feedbackMessage && (
+              <div
+                style={{
+                  marginBottom: '16px',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  textAlign: 'center',
+                  maxWidth: '300px',
+                  backgroundColor: readingAccuracy !== null 
+                    ? readingAccuracy >= 80 
+                      ? '#D1FAE5' // Green background for high accuracy
+                      : readingAccuracy >= 60
+                      ? '#FEF3C7' // Yellow background for medium accuracy
+                      : '#FEE2E2' // Red background for low accuracy
+                    : '#F3F4F6', // Gray background for listening
+                  color: readingAccuracy !== null 
+                    ? readingAccuracy >= 80 
+                      ? '#065F46' // Dark green text
+                      : readingAccuracy >= 60
+                      ? '#92400E' // Dark yellow text
+                      : '#991B1B' // Dark red text
+                    : '#374151', // Dark gray text
+                  border: `2px solid ${
+                    readingAccuracy !== null 
+                      ? readingAccuracy >= 80 
+                        ? '#10B981' // Green border
+                        : readingAccuracy >= 60
+                        ? '#F59E0B' // Yellow border
+                        : '#EF4444' // Red border
+                      : '#9CA3AF' // Gray border
+                  }`
+                }}
+              >
+                {feedbackMessage}
+              </div>
+            )}
+            
+            <button
+              onClick={handleMicrophoneClick}
+              disabled={readOnlyMode ? false : (readingAccuracy !== null && readingAccuracy < 80)}
+              className={`flex items-center justify-center w-20 h-20 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                readOnlyMode 
+                  ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-300'
+                  : isListening
+                  ? 'bg-sky-400 hover:bg-sky-500 focus:ring-sky-300 animate-pulse'
+                  : readingAccuracy !== null && readingAccuracy >= 80
+                  ? 'bg-green-500 hover:bg-green-600 focus:ring-green-300'
+                  : 'bg-[#22C55E] hover:bg-[#1FAA4B] focus:ring-[#A7F3D0]'
+              }`}
+              aria-label={readOnlyMode ? "Read-only mode" : isListening ? "Stop recording" : "Start voice recording"}
+              title={readOnlyMode ? "Read-only mode" : isListening ? "Stop recording" : "Start voice recording"}
+            >
+              {readOnlyMode ? (
+                <Mic className="w-8 h-8" />
+              ) : isListening ? (
+                <MicOff className="w-8 h-8" />
+              ) : (
+                <Mic className="w-8 h-8" />
+              )}
+            </button>
+          </div>
+
+          {/* Page number */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '16px',
+              right: '28px',
+              fontSize: '14px',
+              color: '#a0aec0',
+              fontFamily: 'system-ui, sans-serif'
+            }}
+          >
+            {pageNumber}
+          </div>
+        </div>
+
+        {/* Next Right Page (Back Face) - Shows when flipping */}
+        {nextPage && (
+          <div 
+            className="right-page-back"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+              background: `
+                linear-gradient(135deg, #fafaf7 0%, #f8f8f5 100%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0f0f0' fill-opacity='0.3'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3Ccircle cx='27' cy='27' r='1'/%3E%3Ccircle cx='47' cy='47' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+              `,
+              padding: '28px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              paddingTop: '35%',
+              boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              borderRadius: '0 20px 20px 0',
+              border: '1px solid rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            {/* Page curl effect */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '0',
+                right: '0',
+                width: '20px',
+                height: '20px',
+                background: 'linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, 0.1) 50%)',
+                borderRadius: '0 0 20px 0'
+              }}
+            />
+
+            {/* Next page text content */}
+            <div 
+              style={{
+                fontFamily: '"Georgia", "Times New Roman", serif',
+                fontSize: '23px',
+                lineHeight: '1.7',
+                color: '#1a202c',
+                maxWidth: '38ch',
+                textAlign: 'center',
+                letterSpacing: '0.01em',
+                fontWeight: '400'
+              }}
+            >
+              {nextPage.right.dropCap ? (
+                <div>
+                  <span
+                    style={{
+                      float: 'left',
+                      fontSize: '4.83em',
+                      lineHeight: '0.75',
+                      marginRight: '10px',
+                      marginTop: '8px',
+                      fontWeight: '500',
+                      color: '#2d3748',
+                      fontFamily: '"Georgia", "Times New Roman", serif'
+                    }}
+                  >
+                    {nextPage.right.text.charAt(0)}
+                  </span>
+                  <WordHighlighter
+                    text={nextPage.right.text.slice(1)}
+                    highlightedWordIndex={-1}
+                  />
+                </div>
+              ) : (
+                <WordHighlighter
+                  text={nextPage.right.text}
+                  highlightedWordIndex={-1}
+                />
+              )}
+            </div>
+
+            {/* Microphone Button */}
+            <div style={{ marginTop: '30%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {/* Feedback Message */}
+              {feedbackMessage && (
+                <div
+                  style={{
+                    marginBottom: '16px',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    textAlign: 'center',
+                    maxWidth: '300px',
+                    backgroundColor: readingAccuracy !== null 
+                      ? readingAccuracy >= 80 
+                        ? '#D1FAE5' // Green background for high accuracy
+                        : readingAccuracy >= 60
+                        ? '#FEF3C7' // Yellow background for medium accuracy
+                        : '#FEE2E2' // Red background for low accuracy
+                      : '#F3F4F6', // Gray background for listening
+                    color: readingAccuracy !== null 
+                      ? readingAccuracy >= 80 
+                        ? '#065F46' // Dark green text
+                        : readingAccuracy >= 60
+                        ? '#92400E' // Dark yellow text
+                        : '#991B1B' // Dark red text
+                      : '#374151', // Dark gray text
+                    border: `2px solid ${
+                      readingAccuracy !== null 
+                        ? readingAccuracy >= 80 
+                          ? '#10B981' // Green border
+                          : readingAccuracy >= 60
+                          ? '#F59E0B' // Yellow border
+                          : '#EF4444' // Red border
+                        : '#9CA3AF' // Gray border
+                    }`
+                  }}
+                >
+                  {feedbackMessage}
+                </div>
+              )}
+              
+              <button
+                onClick={handleMicrophoneClick}
+                disabled={readOnlyMode ? false : (readingAccuracy !== null && readingAccuracy < 80)}
+                className={`flex items-center justify-center w-20 h-20 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  readOnlyMode 
+                    ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-300'
+                    : isListening
+                    ? 'bg-sky-400 hover:bg-sky-500 focus:ring-sky-300 animate-pulse'
+                    : readingAccuracy !== null && readingAccuracy >= 80
+                    ? 'bg-green-500 hover:bg-green-600 focus:ring-green-300'
+                    : 'bg-[#22C55E] hover:bg-[#1FAA4B] focus:ring-[#A7F3D0]'
+                }`}
+                aria-label={readOnlyMode ? "Read-only mode" : isListening ? "Stop recording" : "Start voice recording"}
+                title={readOnlyMode ? "Read-only mode" : isListening ? "Stop recording" : "Start voice recording"}
+              >
+                {readOnlyMode ? (
+                  <Mic className="w-8 h-8" />
+                ) : isListening ? (
+                  <MicOff className="w-8 h-8" />
+                ) : (
+                  <Mic className="w-8 h-8" />
+                )}
+              </button>
+            </div>
+
+            {/* Next page number */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '16px',
+                right: '28px',
+                fontSize: '14px',
+                color: '#a0aec0',
+                fontFamily: 'system-ui, sans-serif'
+              }}
+            >
+              {pageNumber + 1}
+            </div>
+          </div>
+        )}
+
+        {/* Dynamic shadow during flip */}
+        {isFlipping && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, transparent 50%)',
+              borderRadius: '0 20px 20px 0',
+              pointerEvents: 'none',
+              opacity: 0.6,
+              zIndex: -1
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
