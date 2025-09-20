@@ -28,10 +28,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Reese-Adv1.png", 
-          alt: "Reese and Finn standing on a misty path in Yellowstone" 
+          alt: "Reese and Oli running through misty Yellowstone at night with the Buffalo Dragon pursuing them" 
         },
         right: {
-          text: "Night drops like a soft blanket. Stars blink on. The Buffalo Dragon snorts—FWOOMP! A cool wind lifts dust as Reese and Oli grab hands and run.",
+          text: "Night dropped over Yellowstone. Steam drifted like ghosts between pines. The Buffalo Dragon snorted, FWOOMP, and dust jumped. Reese grabbed Oli's hand. \"Do not look back.\" Hooves drummed nearer. Stars blinked like watchful eyes. They cut between hissing vents, breath burning, as the ground shivered like something huge rolled beneath it.",
           dropCap: true,
           audio: null
         }
@@ -40,10 +40,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Reese-Adv2.png", 
-          alt: "The geyser field at dusk with steam rising" 
+          alt: "The Buffalo Dragon charging with lowered horns while Reese and Oli hide behind a boulder" 
         },
         right: {
-          text: "The dragon lowers its horns and charges. Hooves drum the ground—badum, badum! Hot breath washes their backs. Grass bends as it rushes by",
+          text: "The dragon lowered its horns and charged. Heat brushed their necks. Reese yanked Oli behind a boulder. Silence, then gravel scraped. The beast circled. \"Why us\" Oli whispered. A whistle rose from angry water. Reese peeked. The dragon's gaze was not hungry. It was herding them toward the geyser fields on purpose.",
           audio: null
         }
       },
@@ -51,10 +51,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Reese-Adv3.png", 
-          alt: "Mysterious glowing eggs among the geysers" 
+          alt: "A pale, egg-shaped boulder glowing in the mist among steaming geysers" 
         },
         right: {
-          text: "Steam hisses—pssshh! Warm mist beads on their cheeks. Geysers pop and puff. A thin path twists toward a giant rock shaped like an egg with a shiny skin.",
+          text: "Steam kissed their faces. Geysers coughed, pssshh, pssshh, like sleepy giants. A pale boulder gleamed ahead, egg smooth and moon shiny. Reese pressed his palm to it and a tingle raced his arm. The surface quivered, a knock from inside. Another knock answered from the ground. \"Not a rock,\" Reese breathed.",
           audio: null
         }
       },
@@ -62,10 +62,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Reese-Adv4.png", 
-          alt: "A baby dragon emerging from the glowing egg" 
+          alt: "Reese inserting colorful crystals into sockets on the glowing egg" 
         },
         right: {
-          text: "Oli points to tiny round holes—sockets. Reese squints. “Not a rock. A Geyser Egg.” He pulls out blue, green, and red crystals. The crystals sparkle, and other hidden eggs wink in the dark.",
+          text: "\"Sockets,\" Oli murmured, pointing to tiny holes. Reese pulled blue, green, and red crystals from his pouch, their trip treasures. \"Pattern\" The egg hummed when blue touched, brighter with green, then sang with red. Across the mist, other mounds winked awake. Geysers inhaled together. The valley stilled, listening for the next click.",
           audio: null
         }
       },
@@ -73,10 +73,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Reese-Adv5.png", 
-          alt: "Reese and Finn following the baby dragons" 
+          alt: "A dragon hatching from the egg in an explosion of steam and light" 
         },
         right: {
-          text: "Click. Click. Click. Crystals slide into sockets and glow. BOOM! Cracks race like lightning. The shell opens. A huge dragon unfolds—wet, steamy, wings dripping, eyes bright as lanterns.",
+          text: "Click. Click. Click. The egg glowed. BOOM. Lightning cracks raced and steam exploded. A dragon unfolded, wet wings, lantern eyes, breath like fog. It blinked at Reese, then toward the circling Buffalo Dragon. From the hills, faint knocks replied. More eggs answered. Oli swallowed. \"Did we start a chorus or an avalanche\"",
           audio: null
         }
       },
@@ -84,34 +84,32 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Reese-Adv6.png", 
-          alt: "Reese and Finn follow" 
+          alt: "The newborn dragon firing a geyser comet while facing the Buffalo Dragon" 
         },
         right: {
-          text: "The dragon spins and blasts a roaring ball of geyser water—WHOOSH! Not fire—hot, sparkling spray. The mist arches high and hangs like a moonlit rainbow",
+          text: "The newborn spun and fired a geyser comet, WHOOSH, sparkling water arcing like a liquid rainbow. Not fire, hot spray and thunder. The Buffalo Dragon pawed the ground, uncertain. One ancient dragon faced one shining new dragon. Reese felt the ground tapping again. Eggs counted and waited. \"We have seconds,\" he said.",
           audio: null
         }
-      }
-      ,
+      },
       {
         type: "spread",
         left: { 
           image: "/covers/Reese-Adv7.png", 
-          alt: "Reese and follow" 
+          alt: "Reese offering a smooth bone to the Buffalo Dragon as a peace gesture" 
         },
         right: {
-          text: "Reese spots a smooth, heavy bone. He offers it with both hands. Crunch! ",
+          text: "Near the cone lay a smooth, heavy bone. Reese lifted it with both hands and stepped forward, heart banging. \"Peace,\" he said, offering the gift. Crunch. The Buffalo Dragon chewed, ears tilting. Its gaze softened, barely. Steam ringed them like a drawn circle. \"One minute,\" Reese whispered. \"Make it count.\"",
           audio: null
         }
-      }
-      ,
+      },
       {
         type: "spread",
         left: { 
           image: "/covers/Reese-Adv8.png", 
-          alt: "Reese and follow" 
+          alt: "Reese and Oli riding the geyser dragon through silver mist while the Buffalo Dragon watches from below" 
         },
         right: {
-          text: "The dragon’s eyes soften. It kneels low. Reese climbs onto its broad, warm, ridged back as silver mist curls around them",
+          text: "The geyser dragon's eyes warmed. It knelt, ridged back steaming. Reese climbed on and Oli wrapped his waist. Wings unfurled, scattering moonlit mist. Below, eggs glittered like stars fallen into earth. Above, the Buffalo Dragon watched, not hunting, guarding. They rose through silver vapor as distant knocks quickened. The valley would wake soon.",
           audio: null
         }
       }
@@ -126,10 +124,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Connor-banana.png", 
-          alt: "Banana the III with his red Santa hat in the jungle" 
+          alt: "Banana the Third with his red Santa hat in the jungle with gorillas, otters, and elephants" 
         },
         right: {
-          text: "Banana the III tilted his red Santa hat and winked. \"Adventure o'clock!\" he chirped. Gorillas thumped, otters waddled, elephants rumbled. Vines dangled like spaghetti, and the mist smelled like wet leaves and secrets.",
+          text: "Banana the Third tipped his red Santa hat. \"Adventure o clock.\" Gorillas thumped like bongo drums. Otters waddled like jelly beans. Elephants rumbled like tummy growls before lunch. Vines dangled. Mist smelled like wet secrets. Banana winked. \"Jungle, bring it.\" The jungle said nothing. Which is how jungles say yes.",
           dropCap: true,
           audio: null
         }
@@ -138,10 +136,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Connor-banana.png",
-          alt: "Ancient temple interior with dancing shadows and torches" 
+          alt: "Ancient temple interior with torches and dancing shadows on carved walls" 
         },
         right: {
-          text: "Inside, torches went fssst-pop! Shadows danced on walls carved with lions, turtles, even a tap-dancing goat (probably). \"This temple is OLD-old,\" whispered Banana. Then—grrrrr—something growled back.",
+          text: "Inside the temple, torches went fssst pop. Shadows did the wiggle dance on lions, turtles, and a goat who clearly took tap lessons. \"Very old,\" Banana whispered. The floor purred. Somewhere, claws clicked. \"Surprises ahead,\" Banana said. He grinned so big his hat almost fell off. Almost.",
           audio: null
         }
       },
@@ -149,10 +147,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Connor-banana.png",
-          alt: "Xuro the jaguar leaping out with fierce teeth bared" 
+          alt: "Xuro the jaguar leaping from a cracked arch with shiny teeth" 
         },
         right: {
-          text: "Xuro the jaguar sprang out, teeth like tiny moons. \"The treasure is mine!\" he roared. Banana held his lantern high. \"Sharing is caring,\" he said. \"Also, we're a team.\"",
+          text: "Xuro the jaguar leaped from a cracked arch, teeth shiny like tiny moons. \"The treasure is mine,\" he roared. Banana raised his lantern. \"Sharing is caring. Also, I have snacks.\" Xuro blinked. \"Snacks\" \"Team snacks,\" Banana added. Xuro's tail swished. Translation: he was thinking about treasure and snacks at the same time.",
           audio: null
         }
       },
@@ -160,10 +158,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Connor-banana.png",
-          alt: "Gorillas drumming, elephants stomping, otters squeaking" 
+          alt: "Gorillas drumming, elephants stomping, otters squeaking in the temple" 
         },
         right: {
-          text: "Gorillas drummed a boom-boom beat. Elephants stomped a quake—thud-THUD! Otters squeaked a brave squeak (it sounded like a rubber duck). Xuro's tail swished like a jump rope before recess.",
+          text: "Gorillas drummed boom boom boom. Elephants stomped thud thud thud. Otters squeaked like rubber ducks at a birthday party. The echo zipped down the hall and came back wearing a new beat. Xuro half smiled. \"The temple likes our music,\" Banana said. \"Or our snacks,\" an otter squeaked hopefully.",
           audio: null
         }
       },
@@ -171,10 +169,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Connor-banana.png",
-          alt: "Temple walls lighting up with glowing symbols and maze patterns" 
+          alt: "Temple walls coming alive with glowing maze patterns" 
         },
         right: {
-          text: "The walls lit up—whoooosh!—with glowing symbols. Lines connected like a maze made by lightning. \"Puzzle party!\" Banana grinned. \"Temple, show us what you got.\"",
+          text: "Walls whooooshed alive. Glowing lines slid together, a maze drawing itself like lightning practicing cursive. \"Puzzle party,\" Banana said. \"Temple, show us your best dance.\" Patterns pulsed. A doorway breathed open, then closed. \"After you,\" Banana bowed. The doorway stayed open. Good manners are powerful. Remember that, doors.",
           audio: null
         }
       },
@@ -182,10 +180,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Connor-banana.png",
-          alt: "Team of animals working together on temple puzzles" 
+          alt: "Team of animals working together solving temple puzzles" 
         },
         right: {
-          text: "Team time: gorillas shoved mega-blocks, otters slip-slid through tiny tunnels, elephants lifted stones like they were marshmallows. Banana called plays: \"Left! Lift! Otter express!\" Click… clack… KER-CHUNK!",
+          text: "Team time. Gorillas nudged mega blocks. Otters slip slid through tiny tunnels and booped secret levers. Elephants lifted stones like marshmallows. Proud faces everywhere. Banana called plays. \"Left. Lift. Otter express.\" Click. Clack. Ker chunk. The floor rolled away, like a tongue saying wow. \"Deeper please,\" whispered the temple.",
           audio: null
         }
       },
@@ -193,10 +191,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Connor-banana.png",
-          alt: "Ancient door creaking open while elephants block Xuro" 
+          alt: "Giant door opening while elephants block Xuro with their rumps" 
         },
         right: {
-          text: "A door groaned open—creeeeak. Xuro lunged, but elephant butts made a perfect wall. \"Denied,\" said Banana. Xuro hissed, melting into the dark like spilled ink. \"Round two later,\" Banana whispered.",
+          text: "A giant door groaned, creeeak. Maybe it needed a snack too. Xuro pounced. Elephants lined up rump to rump, a perfect wall. \"Denied,\" Banana said, very politely. Xuro melted into shadow. \"Round two later,\" Banana whispered. Dust sparkled. Toes tiptoed. Even bravest heroes tiptoe sometimes. It is allowed.",
           audio: null
         }
       },
@@ -204,32 +202,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Connor-banana.png",
-          alt: "Magnificent golden owl statue with glowing eyes and spread wings" 
+          alt: "Golden owl statue with spread wings and a mysterious black crystal in an open chest" 
         },
         right: {
-          text: "They entered a WOW room. A golden owl statue spread huge wings, shiny as sunrise toast. Its eyes glowed—blink!—like twin flashlights. Everyone's mouth did the same thing: O.",
-          audio: null
-        }
-      },
-      {
-        type: "spread",
-        left: { 
-          image: "/covers/Connor-banana.png",
-          alt: "The golden owl's head turning as it speaks to the team" 
-        },
-        right: {
-          text: "The owl's head turned with a slow scrape. \"Only true hearts may see the treasure,\" it boomed. Banana stood tall. \"We've got eight brave hearts…and one stylish hat.\"",
-          audio: null
-        }
-      },
-      {
-        type: "spread",
-        left: { 
-          image: "/covers/Connor-banana.png",
-          alt: "Mysterious black crystal pulsing in an opened chest" 
-        },
-        right: {
-          text: "The chest opened itself—snap! No coins. No crowns. Just a black crystal… pulsing. Thump… thump… thump. Torches fizzled out. In the dark, a whisper curled around them: \"Welcome, travelers… I've been waiting.\"",
+          text: "The wow room. A golden owl spread shiny wings. Eyes blinked like twin flashlights. \"Only true hearts may see the treasure,\" it boomed. The chest snapped open. No coins. No crowns. A black crystal pulsed. Thump. Thump. Torches fizzled. A friendly voice curled through the dark. \"Finally. Guests.\"",
           audio: null
         }
       }
@@ -244,10 +220,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Gaia-School.png", 
-          alt: "A whimsical classroom with floating books and magical elements" 
+          alt: "Jill and Maddy entering a dark, eerie school hallway with bloody handprints on lockers" 
         },
         right: {
-          text: "Miss Willowbrook was not like other teachers. Her classroom had books that floated in mid-air, pencils that wrote by themselves, and a chalkboard that sometimes drew pictures when no one was looking. The students loved her, but the principal was getting suspicious.",
+          text: "Jill and Maddy stepped into Fairview and stopped. Bloody handprints stained the lockers, and the hallway smelled like iron. Above them, the old clock ticked backward, each jerk louder than the last. Lights hummed; whispers stretched thin. Jill gripped Maddy's sleeve. \"This isn't our normal school,\" she said. \"It wants us to notice.\"",
           dropCap: true,
           audio: null
         }
@@ -256,10 +232,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Gaia-School.png", 
-          alt: "Students watching in amazement as their teacher performs magic" 
+          alt: "Miss Thornton with an unnaturally wide smile and unblinking eyes" 
         },
         right: {
-          text: "During math class, Miss Willowbrook would make the numbers dance across the board, solving equations in colorful spirals. For history, she'd wave her hand and the classroom would transform into ancient Rome or medieval England, complete with sounds and smells.",
+          text: "\"Good morning,\" Miss Thornton sang, cardigan neat, bun tight. Her smile looked warm, but her eyes didn't blink. The lights flickered; a cold draft slid by. \"Don't be late,\" she said, watching too closely. Jill forced a smile back. The building felt like it was listening. Jill thought: She knows we know.",
           audio: null
         }
       },
@@ -267,10 +243,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Gaia-School.png", 
-          alt: "The principal peeking through the classroom door suspiciously" 
+          alt: "Jill finding threatening notes in her desk and math book" 
         },
         right: {
-          text: "One day, Principal Grumpleton decided to investigate. He crept up to the classroom door and peered through the window. What he saw made his eyes grow wide as saucers: twenty students floating gently in the air, reading books that glowed like lanterns.",
+          text: "Jill opened her desk. A note flipped out: \"LOSER 102.\" Another hid in her math book: \"LOOK AWAY.\" Not warnings—dares pressed so hard the paper tore. Maddy mouthed, What is it? Jill showed both slips, hands shaking. The backward clock kept ticking—steady, wrong, relentless—as if counting down to them.",
           audio: null
         }
       },
@@ -278,10 +254,10 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Gaia-School.png", 
-          alt: "Miss Willowbrook revealing her secret to the principal" 
+          alt: "Miss Thornton's phone screen showing a sinister message" 
         },
         right: {
-          text: "'I can explain,' said Miss Willowbrook with a twinkle in her eye. 'Learning should be magical, don't you think?' She waved her hand, and suddenly Principal Grumpleton found himself floating too, a big smile spreading across his face for the first time in years.",
+          text: "Pencils scratched. Miss Thornton's phone buzzed three times. Its glow carved sharp shadows across her face. Maddy glanced—then froze. On the screen: \"Did you get the kid?\" A job, not a joke. The screen locked; the teacher scanned the room, pausing on them. Air thinned. A plan was running, and they were inside it.",
           audio: null
         }
       },
@@ -289,10 +265,65 @@ export const storyBooks: Record<string, StoryBook> = {
         type: "spread",
         left: { 
           image: "/covers/Gaia-School.png", 
-          alt: "The whole school enjoying magical learning together" 
+          alt: "A trapdoor in the classroom floor revealing glowing green substance below" 
         },
         right: {
-          text: "From that day forward, Willowbrook Elementary became the most extraordinary school in the world. Students came from far and wide to learn in floating classrooms, where every lesson was an adventure and every day brought new magic.",
+          text: "The floor creaked like something below was breathing. Jill's sneaker tapped; a board lifted. She pried it open. A sour, metallic smell rose as green goo pulsed slowly, heartbeat-bright. Carved symbols ringed the hole, faintly glowing. \"Close it,\" Maddy whispered. Jill couldn't. Her flashlight shook. This wasn't storage. It was a path.",
+          audio: null
+        }
+      },
+      {
+        type: "spread",
+        left: { 
+          image: "/covers/Gaia-School.png", 
+          alt: "Miss Thornton's cane transforming into a living snake with golden eyes" 
+        },
+        right: {
+          text: "The door slammed. Miss Thornton stood in the flicker-light, cane tapping. Wood rippled; the handle peeled into scales. A snake uncoiled—fangs white, eyes gold. Hiss—long and glassy. Desks scraped; someone screamed. \"Meet Snappy,\" she said, stroking its head. Not a pet—a partner. Below, the trapdoor glowed. Miss Thornton had moved first.",
+          audio: null
+        }
+      },
+      {
+        type: "spread",
+        left: { 
+          image: "/covers/Gaia-School.png", 
+          alt: "Jane bravely confronting the snake as it coils around her arm" 
+        },
+        right: {
+          text: "Everyone shrank back. Jane stepped forward. Snappy lunged; she lifted her arm. The snake coiled tight—cold, fast, shining—then stilled. It looked into her eyes and quieted. Miss Thornton's smile cracked; control slipped. \"Good,\" Jane whispered, stroking living metal. Snappy settled like a bracelet. For the first time today, hope breathed.",
+          audio: null
+        }
+      },
+      {
+        type: "spread",
+        left: { 
+          image: "/covers/Gaia-School.png", 
+          alt: "The children running through a corridor of mirrors showing distorted reflections" 
+        },
+        right: {
+          text: "They ran, a door splintered, and a corridor of mirrors glowed. Light swam in the glass like trapped water. Jill's father appeared, arms open—then melted into Miss Thornton's grin. Whispers slid: Stay… forever. Reflections multiplied—offset, wrong. The floor felt icy though dry. Snappy tightened around Jane's arm, hissing—the only honest sound.",
+          audio: null
+        }
+      },
+      {
+        type: "spread",
+        left: { 
+          image: "/covers/Gaia-School.png", 
+          alt: "Two versions of Miss Thornton emerging from mirrors - one kind, one evil" 
+        },
+        right: {
+          text: "The glass rippled; two Miss Thorntons stepped out. One kind, hands open. One smiling with too many teeth, eyes red. \"Children,\" said one. \"Come,\" said the other. Together: \"Choose.\" Jill trembled. Pick wrong, stay forever. Snappy watched the cruel one, unblinking. Shadows bent the wrong way. \"Trust him,\" Jill whispered.",
+          audio: null
+        }
+      },
+      {
+        type: "spread",
+        left: { 
+          image: "/covers/Gaia-School.png", 
+          alt: "The children escaping through a final door as the school crumbles behind them" 
+        },
+        right: {
+          text: "Lightning-quick, Snappy struck. Glass burst into stars; the cruel one reeled. The maze cracked, seams glowing white. \"Go!\" Jane shouted. They sprinted through bending halls to a final door—night air, cold and real. A bus idled; doors sealed behind them. Safe… maybe. In the window's reflection, Miss Thornton smiled. Far behind, a green heartbeat counted backward.",
           audio: null
         }
       }

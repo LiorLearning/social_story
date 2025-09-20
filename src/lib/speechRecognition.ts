@@ -1,22 +1,25 @@
-interface SpeechRecognitionResult {
-  transcript: string;
-  confidence: number;
-}
-
 interface SpeechRecognitionOptions {
-  onResult: (result: SpeechRecognitionResult) => void;
-  onInterimResult?: (transcript: string) => void;
+  onResult: (result: { transcript: string; confidence: number }) => void;
   onError: (error: string) => void;
   onStart: () => void;
   onEnd: () => void;
-  language?: string;
+  onInterimResult?: (transcript: string) => void;
   continuous?: boolean;
+  language?: string;
+}
+
+interface SpeechRecognitionResult {
+  transcript: string;
+  confidence: number;
 }
 
 class SpeechRecognitionService {
   private recognition: any = null;
   private isSupported = false;
   private isActive = false;
+  private isRunning = false;
+  private startTimeout: NodeJS.Timeout | null = null;
+  private currentOptions: SpeechRecognitionOptions | null = null;
 
   constructor() {
     // Check for browser support
@@ -32,21 +35,34 @@ class SpeechRecognitionService {
     return this.isSupported;
   }
 
+  private setupOnEndHandler(options: SpeechRecognitionOptions): void {
+    this.recognition.onend = () => {
+      console.log('Speech recognition ended, isActive:', this.isActive);
+      this.isRunning = false;
+      options.onEnd();
+      
+      // No auto-restart logic - user controls start/stop manually
+      // This eliminates race conditions and makes behavior predictable
+    };
+  }
+
   start(options: SpeechRecognitionOptions): void {
     if (!this.isSupported || !this.recognition) {
-      options.onError('Speech recognition not supported in this browser');
+      options.onError('Speech recognition not supported');
       return;
     }
 
     this.isActive = true;
+    this.currentOptions = options;
 
     // Configure recognition
-    this.recognition.continuous = options.continuous || false;
+    this.recognition.continuous = false; // Always false - no auto-restart
     this.recognition.interimResults = true;
     this.recognition.lang = options.language || 'en-US';
 
-    // Set up event handlers
     this.recognition.onstart = () => {
+      console.log('Speech recognition started');
+      this.isRunning = true;
       options.onStart();
     };
 
@@ -83,39 +99,28 @@ class SpeechRecognitionService {
       options.onError(`Speech recognition error: ${event.error}`);
     };
 
-    this.recognition.onend = () => {
-      console.log('Speech recognition ended, isActive:', this.isActive);
-      options.onEnd();
-      
-      // If continuous mode and still active, restart recognition
-      if (options.continuous && this.isActive) {
-        console.log('Attempting to restart speech recognition...');
-        setTimeout(() => {
-          if (this.isActive) {
-            try {
-              console.log('Restarting speech recognition');
-              this.recognition.start();
-            } catch (error) {
-              console.warn('Failed to restart speech recognition:', error);
-              // If restart fails, try again after a longer delay
-              setTimeout(() => {
-                if (this.isActive) {
-                  try {
-                    this.recognition.start();
-                  } catch (retryError) {
-                    console.error('Failed to restart speech recognition after retry:', retryError);
-                    options.onError(`Failed to restart: ${retryError}`);
-                  }
-                }
-              }, 1000);
-            }
-          }
-        }, 300); // Increased delay for better reliability
-      }
-    };
+    this.setupOnEndHandler(options);
 
     // Start recognition
     try {
+      // Check if recognition is already running
+      if (this.isRunning) {
+        console.warn('Speech recognition is already running, stopping first');
+        this.recognition.stop();
+        // Wait a bit before starting again
+        this.startTimeout = setTimeout(() => {
+          if (this.isActive && !this.isRunning) {
+            try {
+              this.recognition.start();
+            } catch (error) {
+              console.error('Failed to restart speech recognition:', error);
+              options.onError(`Failed to restart: ${error}`);
+            }
+          }
+        }, 100);
+        return;
+      }
+      
       console.log('Starting speech recognition');
       this.recognition.start();
     } catch (error) {
@@ -127,7 +132,16 @@ class SpeechRecognitionService {
   stop(): void {
     console.log('Stopping speech recognition');
     this.isActive = false;
+    this.isRunning = false;
+    
+    // Clear any pending start timeout
+    if (this.startTimeout) {
+      clearTimeout(this.startTimeout);
+      this.startTimeout = null;
+    }
+    
     if (this.recognition) {
+      // Simple stop - no complex handler swapping needed
       this.recognition.stop();
     }
   }
@@ -147,22 +161,22 @@ export function calculateReadingAccuracy(spokenText: string, expectedText: strin
 
   if (!spoken || !expected) return 0;
 
-  // Simple word-based comparison
   const spokenWords = spoken.split(' ');
   const expectedWords = expected.split(' ');
 
-  let matches = 0;
-  const maxLength = Math.max(spokenWords.length, expectedWords.length);
+  if (expectedWords.length === 0) return 0;
 
-  // Count matching words in order
-  for (let i = 0; i < Math.min(spokenWords.length, expectedWords.length); i++) {
-    if (spokenWords[i] === expectedWords[i]) {
-      matches++;
+  // Count how many expected words appear anywhere in the spoken text
+  let correctWords = 0;
+  
+  for (const expectedWord of expectedWords) {
+    if (spokenWords.includes(expectedWord)) {
+      correctWords++;
     }
   }
 
-  // Calculate accuracy as percentage
-  return maxLength > 0 ? (matches / maxLength) * 100 : 0;
+  // Calculate accuracy based on expected words found (not total spoken words)
+  return (correctWords / expectedWords.length) * 100;
 }
 
 // Word-by-word accuracy calculation
@@ -183,16 +197,57 @@ export function calculateWordAccuracies(spokenText: string, expectedText: string
   const expectedWords = expected.split(' ');
   const accuracies: boolean[] = [];
 
-  // Compare each expected word with the corresponding spoken word
-  for (let i = 0; i < expectedWords.length; i++) {
-    if (i < spokenWords.length) {
-      accuracies.push(spokenWords[i] === expectedWords[i]);
-    } else {
-      accuracies.push(false); // Word not spoken
-    }
+  // Check if each expected word appears anywhere in the spoken text
+  for (const expectedWord of expectedWords) {
+    accuracies.push(spokenWords.includes(expectedWord));
   }
 
   return accuracies;
+}
+
+// Detailed transcript analysis for enhanced feedback
+export function analyzeTranscriptAttempts(spokenText: string, expectedText: string): {
+  correctWords: string[];
+  incorrectAttempts: string[];
+  missingWords: string[];
+} {
+  const normalize = (text: string) => 
+    text.toLowerCase()
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+  const spoken = normalize(spokenText);
+  const expected = normalize(expectedText);
+
+  const spokenWords = spoken.split(' ');
+  const expectedWords = expected.split(' ');
+
+  const correctWords: string[] = [];
+  const missingWords: string[] = [];
+  const incorrectAttempts: string[] = [];
+
+  // Find correct and missing words
+  for (const expectedWord of expectedWords) {
+    if (spokenWords.includes(expectedWord)) {
+      correctWords.push(expectedWord);
+    } else {
+      missingWords.push(expectedWord);
+    }
+  }
+
+  // Find incorrect attempts (words spoken that aren't in expected)
+  for (const spokenWord of spokenWords) {
+    if (!expectedWords.includes(spokenWord)) {
+      incorrectAttempts.push(spokenWord);
+    }
+  }
+
+  return {
+    correctWords,
+    incorrectAttempts,
+    missingWords
+  };
 }
 
 export const speechRecognition = new SpeechRecognitionService();

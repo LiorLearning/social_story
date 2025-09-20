@@ -78,7 +78,7 @@ export const ReaderShell: React.FC = () => {
       window.removeEventListener('keydown', handleActivity);
       window.removeEventListener('touchstart', handleActivity);
     };
-  }, [idleTimer]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Touch/swipe handling
   useEffect(() => {
@@ -177,42 +177,37 @@ export const ReaderShell: React.FC = () => {
       >
         {(readAloudState, readAloudControls) => (
           <>
-            {/* Top Bar */}
+            {/* Top Bar - Always Visible */}
+            <TopBar
+              onBack={handleBack}
+              currentPage={currentPageIndex + 1}
+              totalPages={story.pages.length}
+              readAloudState={readAloudState}
+              readAloudControls={readAloudControls}
+            />
+            
+            {/* Read-Only Mode Toggle */}
             <div
               style={{
+                position: 'absolute',
+                top: '20px',
+                right: '120px',
+                zIndex: 20,
                 opacity: controlsVisible ? 1 : 0,
                 transition: 'opacity 300ms ease-in-out',
                 pointerEvents: controlsVisible ? 'auto' : 'none'
               }}
             >
-              <TopBar
-                onBack={handleBack}
-                currentPage={currentPageIndex + 1}
-                totalPages={story.pages.length}
-                readAloudState={readAloudState}
-                readAloudControls={readAloudControls}
-              />
-              
-              {/* Read-Only Mode Toggle */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '20px',
-                  right: '120px',
-                  zIndex: 20
-                }}
+              <Button
+                onClick={() => setReadOnlyMode(!readOnlyMode)}
+                className={`text-xs px-3 py-1 rounded-full transition-all duration-200 ${
+                  readOnlyMode 
+                    ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`}
               >
-                <Button
-                  onClick={() => setReadOnlyMode(!readOnlyMode)}
-                  className={`text-xs px-3 py-1 rounded-full transition-all duration-200 ${
-                    readOnlyMode 
-                      ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                      : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                  }`}
-                >
-                  {readOnlyMode ? 'Read Only' : 'Practice Mode'}
-                </Button>
-              </div>
+                {readOnlyMode ? 'Read Only' : 'Practice Mode'}
+              </Button>
             </div>
 
             {/* Main Stage */}
@@ -222,9 +217,9 @@ export const ReaderShell: React.FC = () => {
                 paddingTop: '70px',
                 minHeight: '100vh',
                 display: 'flex',
-                alignItems: 'flex-start',
+                alignItems: 'center',
                 justifyContent: 'center',
-                padding: '70px 20px 20px',
+                padding: '70px 10px 20px',
                 position: 'relative',
                 zIndex: 2
               }}

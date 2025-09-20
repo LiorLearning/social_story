@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, Square } from 'lucide-react';
 import { WordHighlighter } from './WordHighlighter';
 import { StoryPage } from '@/data/storyPages';
-import { speechRecognition, calculateReadingAccuracy, calculateWordAccuracies } from '@/lib/speechRecognition';
+import { speechRecognition, calculateReadingAccuracy, calculateWordAccuracies, analyzeTranscriptAttempts } from '@/lib/speechRecognition';
 
 interface SpreadProps {
   page: StoryPage;
@@ -28,6 +28,7 @@ export const Spread: React.FC<SpreadProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [isRecognitionActive, setIsRecognitionActive] = useState(false);
   const [readingAccuracy, setReadingAccuracy] = useState<number | null>(null);
+  const [savedAccuracy, setSavedAccuracy] = useState<number | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [liveTranscript, setLiveTranscript] = useState<string>('');
   const [wordAccuracies, setWordAccuracies] = useState<boolean[]>([]);
@@ -48,10 +49,16 @@ export const Spread: React.FC<SpreadProps> = ({
     }
 
     if (isListening) {
-      // User manually stopped - stop everything
+      // User manually stopped - stop everything and save accuracy
       speechRecognition.stop();
       setIsListening(false);
       setIsRecognitionActive(false);
+      
+      // Save the current accuracy score
+      if (readingAccuracy !== null) {
+        setSavedAccuracy(readingAccuracy);
+      }
+      
       setFeedbackMessage('Recording stopped. Click to start again.');
       return;
     }
@@ -113,10 +120,9 @@ export const Spread: React.FC<SpreadProps> = ({
       onEnd: () => {
         console.log('Speech recognition ended');
         setIsRecognitionActive(false);
-        // Don't change isListening here - only user clicks should control it
-        // The continuous mode will handle auto-restart if user hasn't stopped manually
+        // Don't automatically stop listening - let user control when to stop
+        // setIsListening(false); // Removed - user controls start/stop manually
       },
-      continuous: true, // Enable continuous listening
       language: 'en-US'
     });
   }, [readOnlyMode, page.right.text]); // Removed isListening from dependencies
@@ -128,6 +134,7 @@ export const Spread: React.FC<SpreadProps> = ({
     setLiveTranscript('');
     setWordAccuracies([]);
     setReadingAccuracy(null);
+    setSavedAccuracy(null); // Reset saved accuracy for new page
     setFeedbackMessage('');
     setIsListening(false);
     setIsRecognitionActive(false);
@@ -153,7 +160,7 @@ export const Spread: React.FC<SpreadProps> = ({
                 <span
                   style={{
                     float: 'left',
-                    fontSize: '4.83em',
+                    fontSize: '5.6em',
                     lineHeight: '0.75',
                     marginRight: '10px',
                     marginTop: '8px',
@@ -222,18 +229,39 @@ export const Spread: React.FC<SpreadProps> = ({
   };
 
   return (
-    <div 
-      className="spread-container"
-      style={{
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        borderRadius: '20px',
-        overflow: 'visible',
-        position: 'relative',
-        transformStyle: 'preserve-3d'
-      }}
-    >
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {/* Accuracy Score Display at Top */}
+      {savedAccuracy !== null && (
+        <div style={{
+          position: 'absolute',
+          top: '-50px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10,
+          backgroundColor: savedAccuracy >= 80 ? '#10B981' : savedAccuracy >= 60 ? '#F59E0B' : '#EF4444',
+          color: 'white',
+          padding: '8px 16px',
+          borderRadius: '20px',
+          fontSize: '14px',
+          fontWeight: '600',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+        }}>
+          Reading Accuracy: {Math.round(savedAccuracy)}%
+        </div>
+      )}
+      
+      <div 
+        className="spread-container"
+        style={{
+          display: 'flex',
+          width: '100%',
+          height: '100%',
+          borderRadius: '20px',
+          overflow: 'visible',
+          position: 'relative',
+          transformStyle: 'preserve-3d'
+        }}
+      >
       {/* Left Page - Illustration (Static) */}
       <div 
         className="left-page"
@@ -306,12 +334,12 @@ export const Spread: React.FC<SpreadProps> = ({
               linear-gradient(135deg, #fafaf7 0%, #f8f8f5 100%),
               url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0f0f0' fill-opacity='0.3'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3Ccircle cx='27' cy='27' r='1'/%3E%3Ccircle cx='47' cy='47' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
             `,
-            padding: '28px',
+            padding: '22px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
             alignItems: 'center',
-            paddingTop: '35%',
+            paddingTop: '70px',
             boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             borderRadius: '0 20px 20px 0',
             border: '1px solid rgba(0, 0, 0, 0.1)'
@@ -334,10 +362,10 @@ export const Spread: React.FC<SpreadProps> = ({
           <div 
             style={{
               fontFamily: '"Georgia", "Times New Roman", serif',
-              fontSize: '23px',
+              fontSize: '26px',
               lineHeight: '1.7',
               color: '#1a202c',
-              maxWidth: '38ch',
+              maxWidth: '40ch',
               textAlign: 'center',
               letterSpacing: '0.01em',
               fontWeight: '400'
@@ -377,30 +405,6 @@ export const Spread: React.FC<SpreadProps> = ({
                     <span style={{ color: '#3B82F6', marginLeft: '8px' }}>🎤 Recording...</span>
                   )}
                 </span>
-                {accumulatedTranscript && (
-                  <button
-                    onClick={() => {
-                      accumulatedTranscriptRef.current = '';
-                      setAccumulatedTranscript('');
-                      setLiveTranscript('');
-                      setWordAccuracies([]);
-                      setReadingAccuracy(null);
-                      setFeedbackMessage('');
-                    }}
-                    style={{
-                      fontSize: '12px',
-                      padding: '2px 6px',
-                      backgroundColor: '#EF4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                    title="Clear transcription"
-                  >
-                    Clear
-                  </button>
-                )}
               </div>
               <div>
                 {/* Show accumulated transcript in normal style */}
@@ -422,7 +426,15 @@ export const Spread: React.FC<SpreadProps> = ({
           )}
 
           {/* Microphone Button */}
-          <div style={{ marginTop: '30%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ 
+            position: 'absolute',
+            bottom: '80px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center' 
+          }}>
             {/* Feedback Message */}
             {feedbackMessage && (
               <div
@@ -465,7 +477,7 @@ export const Spread: React.FC<SpreadProps> = ({
             
             <button
               onClick={handleMicrophoneClick}
-              disabled={readOnlyMode ? false : (readingAccuracy !== null && readingAccuracy < 80)}
+              disabled={false}
               className={`flex items-center justify-center w-20 h-20 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 readOnlyMode 
                   ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-300'
@@ -481,7 +493,7 @@ export const Spread: React.FC<SpreadProps> = ({
               {readOnlyMode ? (
                 <Mic className="w-8 h-8" />
               ) : isListening ? (
-                <MicOff className="w-8 h-8" />
+                <Square className="w-6 h-6" fill="currentColor" />
               ) : (
                 <Mic className="w-8 h-8" />
               )}
@@ -516,12 +528,12 @@ export const Spread: React.FC<SpreadProps> = ({
                 linear-gradient(135deg, #fafaf7 0%, #f8f8f5 100%),
                 url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0f0f0' fill-opacity='0.3'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3Ccircle cx='27' cy='27' r='1'/%3E%3Ccircle cx='47' cy='47' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
               `,
-              padding: '28px',
+              padding: '22px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-start',
               alignItems: 'center',
-              paddingTop: '35%',
+              paddingTop: '60px',
               boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.25)',
               borderRadius: '0 20px 20px 0',
               border: '1px solid rgba(0, 0, 0, 0.1)'
@@ -544,10 +556,10 @@ export const Spread: React.FC<SpreadProps> = ({
             <div 
               style={{
                 fontFamily: '"Georgia", "Times New Roman", serif',
-                fontSize: '23px',
+                fontSize: '32px',
                 lineHeight: '1.7',
                 color: '#1a202c',
-                maxWidth: '38ch',
+                maxWidth: '46ch',
                 textAlign: 'center',
                 letterSpacing: '0.01em',
                 fontWeight: '400'
@@ -558,7 +570,7 @@ export const Spread: React.FC<SpreadProps> = ({
                   <span
                     style={{
                       float: 'left',
-                      fontSize: '4.83em',
+                      fontSize: '5.6em',
                       lineHeight: '0.75',
                       marginRight: '10px',
                       marginTop: '8px',
@@ -583,7 +595,15 @@ export const Spread: React.FC<SpreadProps> = ({
             </div>
 
             {/* Microphone Button */}
-            <div style={{ marginTop: '30%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ 
+              position: 'absolute',
+              bottom: '80px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center' 
+            }}>
               {/* Feedback Message */}
               {feedbackMessage && (
                 <div
@@ -626,7 +646,7 @@ export const Spread: React.FC<SpreadProps> = ({
               
               <button
                 onClick={handleMicrophoneClick}
-                disabled={readOnlyMode ? false : (readingAccuracy !== null && readingAccuracy < 80)}
+                disabled={false}
                 className={`flex items-center justify-center w-20 h-20 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                   readOnlyMode 
                     ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-300'
@@ -642,7 +662,7 @@ export const Spread: React.FC<SpreadProps> = ({
                 {readOnlyMode ? (
                   <Mic className="w-8 h-8" />
                 ) : isListening ? (
-                  <MicOff className="w-8 h-8" />
+                  <Square className="w-6 h-6" fill="currentColor" />
                 ) : (
                   <Mic className="w-8 h-8" />
                 )}
@@ -680,6 +700,7 @@ export const Spread: React.FC<SpreadProps> = ({
           />
         )}
       </div>
+    </div>
     </div>
   );
 };

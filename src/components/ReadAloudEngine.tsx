@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { elevenLabsService, ElevenLabsVoice } from '@/lib/elevenLabs';
 
 export interface ReadAloudState {
   isPlaying: boolean;
@@ -11,6 +12,10 @@ export interface ReadAloudState {
   speed: number;
   autoPageTurn: boolean;
   pageSounds: boolean;
+  useElevenLabs: boolean;
+  elevenLabsVoices: ElevenLabsVoice[];
+  selectedElevenLabsVoice: ElevenLabsVoice | null;
+  isElevenLabsConfigured: boolean;
 }
 
 export interface ReadAloudControls {
@@ -21,6 +26,8 @@ export interface ReadAloudControls {
   setSpeed: (speed: number) => void;
   setAutoPageTurn: (enabled: boolean) => void;
   setPageSounds: (enabled: boolean) => void;
+  toggleElevenLabs: () => void;
+  setElevenLabsVoice: (voice: ElevenLabsVoice) => void;
 }
 
 interface ReadAloudEngineProps {
@@ -43,15 +50,20 @@ export const ReadAloudEngine: React.FC<ReadAloudEngineProps> = ({
     isPaused: false,
     currentWordIndex: -1,
     currentSentenceIndex: -1,
-    isSupported: 'speechSynthesis' in window,
+    isSupported: elevenLabsService.isConfigured(), // Use ElevenLabs as primary support check
     voices: [],
     selectedVoice: null,
     speed: 1.0,
     autoPageTurn: true,
-    pageSounds: false
+    pageSounds: false,
+    useElevenLabs: true, // Default to ElevenLabs
+    elevenLabsVoices: [],
+    selectedElevenLabsVoice: null,
+    isElevenLabsConfigured: elevenLabsService.isConfigured()
   });
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const wordsRef = useRef<string[]>([]);
   const sentencesRef = useRef<string[]>([]);
 
@@ -81,6 +93,30 @@ export const ReadAloudEngine: React.FC<ReadAloudEngineProps> = ({
       speechSynthesis.removeEventListener('voiceschanged', loadVoices);
     };
   }, [state.isSupported]);
+
+  // Load ElevenLabs voices
+  useEffect(() => {
+    if (!state.isElevenLabsConfigured) return;
+
+    const loadElevenLabsVoices = async () => {
+      try {
+        const voices = await elevenLabsService.getVoices(); // Get all voices to ensure John Doe is included
+        // Find John Doe voice or fallback to first available
+        const johnDoeVoice = voices.find(v => v.voice_id === '7fbQ7yJuEo56rYjrYaEh');
+        const defaultVoice = johnDoeVoice || voices[0] || null;
+        
+        setState(prev => ({
+          ...prev,
+          elevenLabsVoices: voices,
+          selectedElevenLabsVoice: prev.selectedElevenLabsVoice || defaultVoice
+        }));
+      } catch (error) {
+        console.error('Failed to load ElevenLabs voices:', error);
+      }
+    };
+
+    loadElevenLabsVoices();
+  }, [state.isElevenLabsConfigured]);
 
   // Parse text into words and sentences
   useEffect(() => {
@@ -116,59 +152,91 @@ export const ReadAloudEngine: React.FC<ReadAloudEngineProps> = ({
     localStorage.setItem('readAloudPrefs', JSON.stringify(prefs));
   }, [state.speed, state.autoPageTurn, state.pageSounds]);
 
-  const play = useCallback(() => {
-    if (!state.isSupported || !state.selectedVoice) return;
+  const play = useCallback(async () => {
+    // Stop any existing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
 
-    // Stop any existing speech
-    speechSynthesis.cancel();
+    setState(prev => ({ ...prev, isPlaying: true, isPaused: false }));
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = state.selectedVoice;
-    utterance.rate = state.speed;
-    utterance.pitch = 1.0;
-    utterance.volume = 0.8;
+    if (!state.isElevenLabsConfigured || !state.selectedElevenLabsVoice) {
+      console.error('ElevenLabs not configured or no voice selected');
+      setState(prev => ({ ...prev, isPlaying: false }));
+      return;
+    }
 
-    let wordIndex = 0;
-    let sentenceIndex = 0;
+    // Use ElevenLabs
+    try {
+      const audio = await elevenLabsService.generateAudioElement(
+        text, 
+        state.selectedElevenLabsVoice.voice_id
+      );
+      
+      audioRef.current = audio;
+      
+      // Set playback rate
+      audio.playbackRate = state.speed;
 
-    utterance.onboundary = (event) => {
-      if (event.name === 'word') {
-        const currentWord = wordsRef.current[wordIndex];
-        setState(prev => ({ ...prev, currentWordIndex: wordIndex }));
-        onWordHighlight?.(wordIndex, currentWord);
-        wordIndex++;
-      } else if (event.name === 'sentence') {
-        setState(prev => ({ ...prev, currentSentenceIndex: sentenceIndex }));
-        onSentenceHighlight?.(sentenceIndex);
-        sentenceIndex++;
-      }
-    };
+      audio.onplay = () => {
+        setState(prev => ({ ...prev, isPlaying: true, isPaused: false }));
+      };
 
-    utterance.onstart = () => {
-      setState(prev => ({ ...prev, isPlaying: true, isPaused: false }));
-    };
+      audio.onpause = () => {
+        setState(prev => ({ ...prev, isPaused: true }));
+      };
 
-    utterance.onpause = () => {
-      setState(prev => ({ ...prev, isPaused: true }));
-    };
+      audio.onerror = (event) => {
+        console.error('ElevenLabs audio error:', event);
+        setState(prev => ({ 
+          ...prev, 
+          isPlaying: false, 
+          isPaused: false,
+          currentWordIndex: -1,
+          currentSentenceIndex: -1
+        }));
+      };
 
-    utterance.onresume = () => {
-      setState(prev => ({ ...prev, isPaused: false }));
-    };
+      // Word highlighting for ElevenLabs (estimate timing)
+      const words = wordsRef.current;
+      let wordIndex = 0;
+      let wordTimer: NodeJS.Timeout;
 
-    utterance.onend = () => {
-      setState(prev => ({ 
-        ...prev, 
-        isPlaying: false, 
-        isPaused: false, 
-        currentWordIndex: -1,
-        currentSentenceIndex: -1
-      }));
-      onComplete?.();
-    };
+      const startWordHighlighting = () => {
+        const totalDuration = audio.duration || (words.length * 0.5); // Estimate if duration not available
+        const wordDuration = totalDuration / words.length;
 
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
+        wordTimer = setInterval(() => {
+          if (wordIndex < words.length && !audio.paused && !audio.ended) {
+            setState(prev => ({ ...prev, currentWordIndex: wordIndex }));
+            onWordHighlight?.(wordIndex, words[wordIndex]);
+            wordIndex++;
+          } else {
+            clearInterval(wordTimer);
+          }
+        }, wordDuration * 1000);
+      };
+
+      audio.onloadedmetadata = () => {
+        startWordHighlighting();
+      };
+
+      audio.onended = () => {
+        if (wordTimer) clearInterval(wordTimer);
+        setState(prev => ({ 
+          ...prev, 
+          isPlaying: false, 
+          isPaused: false, 
+          currentWordIndex: -1,
+          currentSentenceIndex: -1
+        }));
+        onComplete?.();
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error('ElevenLabs playback error:', error);
       setState(prev => ({ 
         ...prev, 
         isPlaying: false, 
@@ -176,22 +244,26 @@ export const ReadAloudEngine: React.FC<ReadAloudEngineProps> = ({
         currentWordIndex: -1,
         currentSentenceIndex: -1
       }));
-    };
-
-    utteranceRef.current = utterance;
-    speechSynthesis.speak(utterance);
-  }, [text, state.isSupported, state.selectedVoice, state.speed, onWordHighlight, onSentenceHighlight, onComplete]);
+    }
+  }, [text, state.isElevenLabsConfigured, state.selectedElevenLabsVoice, state.speed, onWordHighlight, onComplete]);
 
   const pause = useCallback(() => {
-    if (state.isPlaying && !state.isPaused) {
-      speechSynthesis.pause();
-    } else if (state.isPaused) {
-      speechSynthesis.resume();
+    if (audioRef.current) {
+      if (state.isPlaying && !state.isPaused) {
+        audioRef.current.pause();
+        setState(prev => ({ ...prev, isPaused: true }));
+      } else if (state.isPaused) {
+        audioRef.current.play();
+        setState(prev => ({ ...prev, isPaused: false }));
+      }
     }
   }, [state.isPlaying, state.isPaused]);
 
   const stop = useCallback(() => {
-    speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     setState(prev => ({ 
       ...prev, 
       isPlaying: false, 
@@ -220,6 +292,14 @@ export const ReadAloudEngine: React.FC<ReadAloudEngineProps> = ({
     savePreferences({ pageSounds: enabled });
   }, [savePreferences]);
 
+  const toggleElevenLabs = useCallback(() => {
+    setState(prev => ({ ...prev, useElevenLabs: !prev.useElevenLabs }));
+  }, []);
+
+  const setElevenLabsVoice = useCallback((voice: ElevenLabsVoice) => {
+    setState(prev => ({ ...prev, selectedElevenLabsVoice: voice }));
+  }, []);
+
   const controls: ReadAloudControls = {
     play,
     pause,
@@ -227,7 +307,9 @@ export const ReadAloudEngine: React.FC<ReadAloudEngineProps> = ({
     setVoice,
     setSpeed,
     setAutoPageTurn,
-    setPageSounds
+    setPageSounds,
+    toggleElevenLabs,
+    setElevenLabsVoice
   };
 
   return <>{children(state, controls)}</>;

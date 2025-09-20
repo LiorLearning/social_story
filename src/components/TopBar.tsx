@@ -111,8 +111,8 @@ export const TopBar: React.FC<TopBarProps> = ({
         <div className="flex items-center gap-2">
           <Button
             onClick={handleListenClick}
-            disabled={!readAloudState.isSupported}
-            className="bg-[#22C55E] hover:bg-[#1FAA4B] text-white font-medium px-4 py-2 rounded-full focus:ring-[#A7F3D0]"
+            disabled={!readAloudState.isElevenLabsConfigured}
+            className="bg-[#22C55E] hover:bg-[#1FAA4B] text-white font-medium px-4 py-2 rounded-full focus:ring-[#A7F3D0] disabled:bg-gray-400 disabled:cursor-not-allowed"
             aria-label={readAloudState.isPlaying ? "Pause read-aloud" : "Play read-aloud"}
           >
             {readAloudState.isPlaying ? (
@@ -120,15 +120,15 @@ export const TopBar: React.FC<TopBarProps> = ({
             ) : (
               <Play className="w-4 h-4 mr-2" />
             )}
-            Listen
+            Listen {!readAloudState.isElevenLabsConfigured && "(Configure ElevenLabs)"}
           </Button>
           
           <Button
             onClick={() => setShowListenMenu(!showListenMenu)}
-            disabled={!readAloudState.isSupported}
+            disabled={!readAloudState.isElevenLabsConfigured}
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-white/10 focus:ring-white/20 p-1"
+            className="text-white hover:bg-white/10 focus:ring-white/20 p-1 disabled:text-gray-400"
             aria-label="Listen settings"
           >
             <ChevronDown className="w-4 h-4" />
@@ -141,26 +141,28 @@ export const TopBar: React.FC<TopBarProps> = ({
             className="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
             style={{ animation: 'fadeIn 150ms ease-out' }}
           >
-            {/* Voice Selection */}
-            <div className="px-4 py-2 border-b border-gray-100">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Voice
-              </label>
-              <select
-                value={readAloudState.selectedVoice?.name || ''}
-                onChange={(e) => {
-                  const voice = readAloudState.voices.find(v => v.name === e.target.value);
-                  if (voice) readAloudControls.setVoice(voice);
-                }}
-                className="w-full text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                {readAloudState.voices.map((voice) => (
-                  <option key={voice.name} value={voice.name}>
-                    {voice.name} ({voice.lang})
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Voice Selection - ElevenLabs Only */}
+            {readAloudState.isElevenLabsConfigured && (
+              <div className="px-4 py-2 border-b border-gray-100">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  AI Voice (ElevenLabs)
+                </label>
+                <select
+                  value={readAloudState.selectedElevenLabsVoice?.voice_id || ''}
+                  onChange={(e) => {
+                    const voice = readAloudState.elevenLabsVoices.find(v => v.voice_id === e.target.value);
+                    if (voice) readAloudControls.setElevenLabsVoice(voice);
+                  }}
+                  className="w-full text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  {readAloudState.elevenLabsVoices.map((voice) => (
+                    <option key={voice.voice_id} value={voice.voice_id}>
+                      {voice.name} {voice.description && `(${voice.description})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Speed Selection */}
             <div className="px-4 py-2 border-b border-gray-100">
@@ -222,7 +224,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-4px); }
           to { opacity: 1; transform: translateY(0); }

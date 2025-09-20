@@ -90,8 +90,9 @@ export const Book: React.FC<BookProps> = ({
        style={{
          perspective: '1600px',
          perspectiveOrigin: 'center center',
-         maxWidth: '2400px', // Much wider to match the screenshot
-         minWidth: '500px',
+         width: '90vw', // Use 90% of viewport width
+         maxWidth: '3500px', // Even larger maximum
+         minWidth: '800px', // Larger minimum
          aspectRatio: '30/12', // Wide panoramic aspect ratio (1.78:1)
          margin: '0 auto',
          cursor: isFlipping ? 'wait' : 'pointer',
