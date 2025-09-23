@@ -27,12 +27,12 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ story, isOpen, onClose })
   // Generate dynamic comments based on story
   const generateCommentsForStory = (story: Story): Comment[] => {
     const commentPool: (Comment & { storyIds: string[] })[] = [
-      // Story 1: Reese & the Geyser Eggs of Yellowstone (5 comments)
+      // Story 1: Geyser Eggs of Yellowstone - Part 2 (5 comments)
       {
         id: '1',
         storyIds: ['1'],
         author: { name: 'Sophia', avatar: '/a-s.png' },
-        content: 'OMG the geyser eggs are SO cool!! What do u think comes out of them?? 🥚✨',
+        content: 'OMG the geyser eggs are SO cool!! 🥚✨',
         likes: 5,
         isLiked: false,
         timestamp: '3h ago'
@@ -41,22 +41,13 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ story, isOpen, onClose })
         id: '2',
         storyIds: ['1'],
         author: { name: 'Marcus', avatar: '/a-m2.png' },
-        content: 'Reese is super brave! I wanna go to Yellowstone now and find eggs too!',
+        content: 'I wanna go to Yellowstone now and find eggs too!',
         likes: 2,
         isLiked: false,
         timestamp: '5h ago'
       },
       {
         id: '3',
-        storyIds: ['1'],
-        author: { name: 'Luna', avatar: '/a-l.png' },
-        content: 'This story made me feel like I was really there with Reese! So awesome!',
-        likes: 3,
-        isLiked: false,
-        timestamp: '1d ago'
-      },
-      {
-        id: '4',
         storyIds: ['1'],
         author: { name: 'Kai', avatar: '/a-k.png' },
         content: 'Best story ever!! Please write more Reese adventures! 🔥',
@@ -65,7 +56,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ story, isOpen, onClose })
         timestamp: '2d ago'
       },
       {
-        id: '5a',
+        id: '4a',
         storyIds: ['1'],
         author: { name: 'Emma', avatar: '/a-em2.png' },
         content: 'I wanna visit Yellowstone now! Do real geysers have eggs like this? 🌋',
@@ -101,98 +92,6 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ story, isOpen, onClose })
             isLiked: false,
             timestamp: '1h ago'
           },
-          {
-            id: '6-2',
-            author: { name: 'Oliver', avatar: '/a-o.png' },
-            content: 'My favorite part was when monkey threw bananas like ninja stars!',
-            likes: 4,
-            isLiked: false,
-            timestamp: '1h ago'
-          }
-        ]
-      },
-      {
-        id: '7',
-        storyIds: ['2'],
-        author: { name: 'Maya', avatar: '/a-ma.png' },
-        content: 'I love the banana boomerang!! Thats so cool! Can monkeys really do that? 🍌',
-        likes: 5,
-        isLiked: false,
-        timestamp: '4h ago',
-        replies: [
-          {
-            id: '7-1',
-            author: { name: 'Ethan', avatar: '/a-e2.png' },
-            content: 'Probably not but it would be awesome if they could!',
-            likes: 2,
-            isLiked: false,
-            timestamp: '3h ago'
-          }
-        ]
-      },
-      {
-        id: '8',
-        storyIds: ['2'],
-        author: { name: 'Aria', avatar: '/a-ar.png' },
-        content: 'Me and my little brother read this every night! He loves the monkey sounds 🐒',
-        likes: 7,
-        isLiked: false,
-        timestamp: '6h ago',
-        replies: [
-          {
-            id: '8-1',
-            author: { name: 'Finn', avatar: '/a-f.png' },
-            content: 'Thats so cute! I read it to my sister too!',
-            likes: 3,
-            isLiked: false,
-            timestamp: '5h ago'
-          },
-          {
-            id: '8-2',
-            author: { name: 'Maya', avatar: '/a-may.png' },
-            content: 'Same! My baby cousin always asks for the monkey story! 🐵',
-            likes: 2,
-            isLiked: false,
-            timestamp: '4h ago'
-          }
-        ]
-      },
-      {
-        id: '9',
-        storyIds: ['2'],
-        author: { name: 'Leo', avatar: '/a-le.png' },
-        content: 'The jaguar and monkey becoming friends is my favorite part! 🐆🐒',
-        likes: 5,
-        isLiked: false,
-        timestamp: '8h ago',
-        replies: [
-          {
-            id: '9-1',
-            author: { name: 'Zoe', avatar: '/a-zo2.png' },
-            content: 'Yes! It shows that different animals can be friends too!',
-            likes: 4,
-            isLiked: false,
-            timestamp: '7h ago'
-          }
-        ]
-      },
-      {
-        id: '10',
-        storyIds: ['2'],
-        author: { name: 'Nova', avatar: '/a-no.png' },
-        content: 'I wish I could swing through trees like the monkey! That looks so fun! 🌳',
-        likes: 3,
-        isLiked: false,
-        timestamp: '12h ago',
-        replies: [
-          {
-            id: '10-1',
-            author: { name: 'River', avatar: '/a-ri.png' },
-            content: 'Me too! Maybe we can build a treehouse and pretend!',
-            likes: 2,
-            isLiked: false,
-            timestamp: '10h ago'
-          }
         ]
       },
       {

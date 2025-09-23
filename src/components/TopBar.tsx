@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, Play, Pause, ChevronDown, Volume2, Settings } from 'lucide-react';
+import { ChevronLeft, Play, Pause, MoreVertical, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ReadAloudState, ReadAloudControls } from './ReadAloudEngine';
 
@@ -9,45 +9,151 @@ interface TopBarProps {
   totalPages: number;
   readAloudState: ReadAloudState;
   readAloudControls: ReadAloudControls;
+  storyTitle?: string;
+  pageImage?: string;
+  storyId?: string;
 }
+
+// Color extraction and harmonization utilities
+const extractDominantColor = async (imageUrl: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve('#F59E0B'); // Fallback warm color
+        return;
+      }
+
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      let r = 0, g = 0, b = 0;
+      const sampleSize = 10; // Sample every 10th pixel for performance
+      let count = 0;
+
+      for (let i = 0; i < data.length; i += 4 * sampleSize) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+        count++;
+      }
+
+      r = Math.floor(r / count);
+      g = Math.floor(g / count);
+      b = Math.floor(b / count);
+
+      // Convert to warm, high-energy hue
+      const warmColor = harmonizeToWarm(r, g, b);
+      resolve(warmColor);
+    };
+    img.onerror = () => resolve('#F59E0B'); // Fallback
+    img.src = imageUrl;
+  });
+};
+
+const harmonizeToWarm = (r: number, g: number, b: number): string => {
+  // Convert to HSL
+  const max = Math.max(r, g, b) / 255;
+  const min = Math.min(r, g, b) / 255;
+  const diff = max - min;
+  
+  let h = 0;
+  if (diff !== 0) {
+    if (max === r / 255) h = ((g / 255 - b / 255) / diff) % 6;
+    else if (max === g / 255) h = (b / 255 - r / 255) / diff + 2;
+    else h = (r / 255 - g / 255) / diff + 4;
+  }
+  h = Math.round(h * 60);
+  if (h < 0) h += 360;
+
+  // Shift to warm range (20-60 degrees for orange/yellow)
+  const warmHue = 30 + (h % 30); // Keep in warm range
+  const saturation = Math.max(0.7, (max - min)); // High saturation
+  const lightness = Math.min(0.6, Math.max(0.4, (max + min) / 2)); // Medium lightness
+
+  return `hsl(${warmHue}, ${saturation * 100}%, ${lightness * 100}%)`;
+};
+
+const getContrastColor = (backgroundColor: string): string => {
+  // Simple contrast calculation - in production, use a proper WCAG calculator
+  const rgb = backgroundColor.match(/\d+/g);
+  if (!rgb) return '#000000';
+  
+  const [r, g, b] = rgb.map(Number);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  return luminance > 0.5 ? '#000000' : '#FFFFFF';
+};
+
+// Get story-specific emoji and avatar
+const getStoryTheme = (storyId: string) => {
+  const themes = {
+    '1': { emoji: '🥚', avatar: '🐉' }, // Reese & Geyser Eggs - eggs for progress, dragon avatar
+    '2': { emoji: '🍌', avatar: '🐵' }, // Banana Monkey - bananas for progress, monkey avatar
+    '3': { emoji: '🏫', avatar: '👩‍🏫' }, // Mischievous Teacher - school for progress, teacher avatar
+    '4': { emoji: '❄️', avatar: '🧊' }, // Ice Monster - snowflakes for progress, ice avatar
+    '5': { emoji: '🌟', avatar: '👭' }, // Mila & Vivienne - stars for progress, sisters avatar
+  };
+  
+  return themes[storyId as keyof typeof themes] || { emoji: '📖', avatar: '📚' };
+};
 
 export const TopBar: React.FC<TopBarProps> = ({
   onBack,
   currentPage,
   totalPages,
   readAloudState,
-  readAloudControls
+  readAloudControls,
+  storyTitle = "Story Adventure",
+  pageImage,
+  storyId = "1"
 }) => {
-  const [showListenMenu, setShowListenMenu] = useState(false);
+  const [showGrownUpsMenu, setShowGrownUpsMenu] = useState(false);
+  const [backgroundColor, setBackgroundColor] = useState('#F59E0B');
+  const [textColor, setTextColor] = useState('#000000');
+  const [showXP, setShowXP] = useState(false);
+  const [xpAmount, setXpAmount] = useState(5);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Extract color from page image
+  useEffect(() => {
+    if (pageImage) {
+      extractDominantColor(pageImage).then(color => {
+        setBackgroundColor(color);
+        setTextColor(getContrastColor(color));
+      });
+    }
+  }, [pageImage]);
+
+  // Show XP on page change (simulate)
+  useEffect(() => {
+    if (currentPage > 1) {
+      setShowXP(true);
+      const timer = setTimeout(() => setShowXP(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage]);
 
   // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowListenMenu(false);
+        setShowGrownUpsMenu(false);
       }
     };
 
-    if (showListenMenu) {
+    if (showGrownUpsMenu) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [showListenMenu]);
-
-  // Close menu on escape
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setShowListenMenu(false);
-      }
-    };
-
-    if (showListenMenu) {
-      document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
-    }
-  }, [showListenMenu]);
+  }, [showGrownUpsMenu]);
 
   const handleListenClick = () => {
     if (readAloudState.isPlaying) {
@@ -57,14 +163,34 @@ export const TopBar: React.FC<TopBarProps> = ({
     }
   };
 
-  const progressDots = Array.from({ length: totalPages }, (_, i) => (
-    <div
-      key={i}
-      className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${
-        i === currentPage - 1 ? 'bg-white' : 'bg-white/30'
-      }`}
-    />
-  ));
+  // Get story theme
+  const storyTheme = getStoryTheme(storyId);
+  
+  // Generate progress indicators (totalPages - 1 to exclude final karaoke page)
+  const progressCount = totalPages - 1;
+  const progressIndicators = Array.from({ length: progressCount }, (_, i) => {
+    const filled = i < currentPage && currentPage <= progressCount;
+    return (
+      <div
+        key={i}
+        style={{
+          width: '24px',
+          height: '24px',
+          fontSize: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          filter: filled ? 'none' : 'grayscale(1) opacity(0.3)',
+          transition: 'all 200ms ease'
+        }}
+      >
+        {storyTheme.emoji}
+      </div>
+    );
+  });
+
+  const surfaceColor = textColor === '#FFFFFF' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+  const hoverColor = textColor === '#FFFFFF' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)';
 
   return (
     <div 
@@ -74,111 +200,210 @@ export const TopBar: React.FC<TopBarProps> = ({
         top: 0,
         left: 0,
         right: 0,
-        height: '56px',
-        background: 'rgba(15, 23, 42, 0.85)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        height: '72px',
+        backgroundColor,
         zIndex: 50,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 20px'
+        padding: '0 16px',
+        gap: '12px',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        animation: 'slideDown 300ms ease-out'
       }}
     >
-      {/* Left: Back button */}
-      <Button
+      {/* Back Button */}
+      <button
         onClick={onBack}
-        variant="ghost"
-        size="sm"
-        className="text-white hover:bg-white/10 focus:ring-white/20"
-        aria-label="Go back"
+        style={{
+          minWidth: '48px',
+          height: '48px',
+          borderRadius: '12px',
+          backgroundColor: surfaceColor,
+          border: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: textColor,
+          cursor: 'pointer',
+          transition: 'all 200ms ease',
+          outline: 'none'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = hoverColor}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = surfaceColor}
+        onFocus={(e) => e.currentTarget.style.outline = `2px solid ${textColor}`}
+        onBlur={(e) => e.currentTarget.style.outline = 'none'}
+        aria-label="Back"
       >
-        <ChevronLeft className="w-5 h-5" />
-      </Button>
+        <ChevronLeft size={24} />
+      </button>
 
-      {/* Center: Page counter and progress dots */}
-      <div className="flex items-center gap-4">
-        <span className="text-white font-medium">
-          {currentPage}/{totalPages}
+      {/* Avatar + Title */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+        <div style={{ 
+          width: '32px', 
+          height: '32px', 
+          borderRadius: '50%', 
+          backgroundColor: surfaceColor,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '20px'
+        }}>
+          {storyTheme.avatar}
+        </div>
+        <span style={{ 
+          color: textColor, 
+          fontSize: '18px', 
+          fontWeight: '600',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          maxWidth: '200px'
+        }}>
+          {storyTitle}
         </span>
-        <div className="flex items-center gap-1">
-          {progressDots}
+      </div>
+
+      {/* Progress Section */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, justifyContent: 'center' }}>
+        <span style={{ 
+          color: textColor, 
+          fontSize: '18px', 
+          fontWeight: '600',
+          whiteSpace: 'nowrap'
+        }}>
+          Page {currentPage} of {totalPages}
+        </span>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          {progressIndicators}
         </div>
       </div>
 
-      {/* Right: Listen button with menu */}
-      <div className="relative" ref={menuRef}>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleListenClick}
-            disabled={!readAloudState.isElevenLabsConfigured}
-            className="bg-[#22C55E] hover:bg-[#1FAA4B] text-white font-medium px-4 py-2 rounded-full focus:ring-[#A7F3D0] disabled:bg-gray-400 disabled:cursor-not-allowed"
-            aria-label={readAloudState.isPlaying ? "Pause read-aloud" : "Play read-aloud"}
-          >
-            {readAloudState.isPlaying ? (
-              <Pause className="w-4 h-4 mr-2" />
-            ) : (
-              <Play className="w-4 h-4 mr-2" />
-            )}
-            Listen {!readAloudState.isElevenLabsConfigured && "(Configure ElevenLabs)"}
-          </Button>
-          
-          <Button
-            onClick={() => setShowListenMenu(!showListenMenu)}
-            disabled={!readAloudState.isElevenLabsConfigured}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/10 focus:ring-white/20 p-1 disabled:text-gray-400"
-            aria-label="Listen settings"
-          >
-            <ChevronDown className="w-4 h-4" />
-          </Button>
+      {/* XP Chip */}
+      {showXP && (
+        <div style={{
+          backgroundColor: '#10B981',
+          color: 'white',
+          padding: '6px 12px',
+          borderRadius: '20px',
+          fontSize: '14px',
+          fontWeight: '600',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          animation: 'xpPop 1s ease-out'
+        }}>
+          ⭐ +{xpAmount}
         </div>
+      )}
 
-        {/* Listen Menu Dropdown */}
-        {showListenMenu && (
-          <div
-            className="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
-            style={{ animation: 'fadeIn 150ms ease-out' }}
-          >
-            {/* Voice Selection - ElevenLabs Only */}
-            {readAloudState.isElevenLabsConfigured && (
-              <div className="px-4 py-2 border-b border-gray-100">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  AI Voice (ElevenLabs)
-                </label>
-                <select
-                  value={readAloudState.selectedElevenLabsVoice?.voice_id || ''}
-                  onChange={(e) => {
-                    const voice = readAloudState.elevenLabsVoices.find(v => v.voice_id === e.target.value);
-                    if (voice) readAloudControls.setElevenLabsVoice(voice);
-                  }}
-                  className="w-full text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  {readAloudState.elevenLabsVoices.map((voice) => (
-                    <option key={voice.voice_id} value={voice.voice_id}>
-                      {voice.name} {voice.description && `(${voice.description})`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+      {/* Hear Story Button */}
+      <button
+        onClick={handleListenClick}
+        style={{
+          height: '48px',
+          padding: '0 20px',
+          borderRadius: '24px',
+          backgroundColor: '#10B981',
+          color: 'white',
+          border: 'none',
+          fontSize: '18px',
+          fontWeight: '600',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          cursor: 'pointer',
+          transition: 'all 200ms ease',
+          outline: 'none',
+          animation: readAloudState.isPlaying ? 'none' : 'pulse 2s infinite'
+        }}
+        onFocus={(e) => e.currentTarget.style.outline = `2px solid ${textColor}`}
+        onBlur={(e) => e.currentTarget.style.outline = 'none'}
+        aria-label={readAloudState.isPlaying ? "Pause" : "Hear Story"}
+      >
+        {readAloudState.isPlaying ? <Pause size={20} /> : <Volume2 size={20} />}
+        {readAloudState.isPlaying ? 'Pause' : 'Hear Story'}
+        {readAloudState.isPlaying && (
+          <span style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            padding: '2px 6px',
+            borderRadius: '8px',
+            fontSize: '12px',
+            marginLeft: '4px'
+          }}>
+            0:15
+          </span>
+        )}
+      </button>
 
-            {/* Speed Selection */}
-            <div className="px-4 py-2 border-b border-gray-100">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Speed
+      {/* For Grown-ups Menu */}
+      <div style={{ position: 'relative' }} ref={menuRef}>
+        <button
+          onClick={() => setShowGrownUpsMenu(!showGrownUpsMenu)}
+          style={{
+            minWidth: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            backgroundColor: surfaceColor,
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: textColor,
+            cursor: 'pointer',
+            transition: 'all 200ms ease',
+            outline: 'none'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = hoverColor}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = surfaceColor}
+          onFocus={(e) => e.currentTarget.style.outline = `2px solid ${textColor}`}
+          onBlur={(e) => e.currentTarget.style.outline = 'none'}
+          aria-label="For Grown-ups"
+        >
+          <MoreVertical size={20} />
+        </button>
+
+        {/* Dropdown Menu */}
+        {showGrownUpsMenu && (
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            right: 0,
+            marginTop: '8px',
+            width: '280px',
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            padding: '16px',
+            zIndex: 100,
+            animation: 'fadeInUp 200ms ease-out'
+          }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '600', color: '#374151' }}>
+              Settings & Help
+            </h3>
+            
+            {/* Speed Control */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#6B7280', marginBottom: '8px' }}>
+                Reading Speed
               </label>
-              <div className="flex gap-2">
+              <div style={{ display: 'flex', gap: '8px' }}>
                 {[0.8, 1.0, 1.25, 1.5].map((speed) => (
                   <button
                     key={speed}
                     onClick={() => readAloudControls.setSpeed(speed)}
-                    className={`px-3 py-1 text-sm rounded transition-colors ${
-                      readAloudState.speed === speed
-                        ? 'bg-green-100 text-green-800 border border-green-300'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #E5E7EB',
+                      backgroundColor: readAloudState.speed === speed ? '#10B981' : 'white',
+                      color: readAloudState.speed === speed ? 'white' : '#374151',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 200ms ease'
+                    }}
                   >
                     {speed}x
                   </button>
@@ -186,37 +411,63 @@ export const TopBar: React.FC<TopBarProps> = ({
               </div>
             </div>
 
-            {/* Settings */}
-            <div className="px-4 py-2">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-700">Auto page turn</span>
+            {/* Toggle Settings */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', color: '#374151' }}>Auto page turn</span>
                 <button
                   onClick={() => readAloudControls.setAutoPageTurn(!readAloudState.autoPageTurn)}
-                  className={`w-10 h-6 rounded-full transition-colors ${
-                    readAloudState.autoPageTurn ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
+                  style={{
+                    width: '44px',
+                    height: '24px',
+                    borderRadius: '12px',
+                    backgroundColor: readAloudState.autoPageTurn ? '#10B981' : '#E5E7EB',
+                    border: 'none',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    transition: 'all 200ms ease'
+                  }}
                 >
-                  <div
-                    className={`w-4 h-4 bg-white rounded-full transition-transform ${
-                      readAloudState.autoPageTurn ? 'translate-x-5' : 'translate-x-1'
-                    }`}
-                  />
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: 'white',
+                    position: 'absolute',
+                    top: '2px',
+                    left: readAloudState.autoPageTurn ? '22px' : '2px',
+                    transition: 'all 200ms ease',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                  }} />
                 </button>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">Page flip sound</span>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', color: '#374151' }}>Page flip sounds</span>
                 <button
                   onClick={() => readAloudControls.setPageSounds(!readAloudState.pageSounds)}
-                  className={`w-10 h-6 rounded-full transition-colors ${
-                    readAloudState.pageSounds ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
+                  style={{
+                    width: '44px',
+                    height: '24px',
+                    borderRadius: '12px',
+                    backgroundColor: readAloudState.pageSounds ? '#10B981' : '#E5E7EB',
+                    border: 'none',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    transition: 'all 200ms ease'
+                  }}
                 >
-                  <div
-                    className={`w-4 h-4 bg-white rounded-full transition-transform ${
-                      readAloudState.pageSounds ? 'translate-x-5' : 'translate-x-1'
-                    }`}
-                  />
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: 'white',
+                    position: 'absolute',
+                    top: '2px',
+                    left: readAloudState.pageSounds ? '22px' : '2px',
+                    transition: 'all 200ms ease',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                  }} />
                 </button>
               </div>
             </div>
@@ -225,13 +476,34 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-4px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes slideDown {
+          from { transform: translateY(-100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        
+        @keyframes xpPop {
+          0% { transform: scale(0) rotate(-12deg); opacity: 0; }
+          50% { transform: scale(1.2) rotate(-6deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+          from { transform: translateY(8px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @media (max-width: 640px) {
+          .top-bar {
+            padding: 0 12px !important;
+            gap: 8px !important;
+          }
         }
       `}</style>
     </div>
   );
 };
-
-

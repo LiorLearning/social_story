@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Spread } from './Spread';
-import { StoryPage } from '@/data/storyPages';
+import { KaraokeEnding } from './KaraokeEnding';
+import { StoryPage, FinalPage } from '@/data/storyPages';
 import { pageFlipSound } from '@/lib/pageFlipSound';
 
 interface BookProps {
@@ -84,6 +85,26 @@ export const Book: React.FC<BookProps> = ({
 
   if (!currentPage) return null;
 
+  // For final pages, render without book styling
+  if (currentPage.type === 'final') {
+    return (
+      <div 
+        className={`karaoke-container ${className}`}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 1000
+        }}
+        onClick={handleClick}
+      >
+        <KaraokeEnding page={currentPage as FinalPage} />
+      </div>
+    );
+  }
+
   return (
     <div 
       className={`book-container ${className}`}
@@ -142,7 +163,7 @@ export const Book: React.FC<BookProps> = ({
       >
         <Spread
           page={currentPage}
-          nextPage={nextPage}
+          nextPage={nextPage && nextPage.type === 'spread' ? nextPage : undefined}
           isFlipping={isFlipping}
           flipDirection={flipDirection}
           highlightedWordIndex={highlightedWordIndex}

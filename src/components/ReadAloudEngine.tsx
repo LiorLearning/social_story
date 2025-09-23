@@ -102,7 +102,7 @@ export const ReadAloudEngine: React.FC<ReadAloudEngineProps> = ({
       try {
         const voices = await elevenLabsService.getVoices(); // Get all voices to ensure John Doe is included
         // Find John Doe voice or fallback to first available
-        const johnDoeVoice = voices.find(v => v.voice_id === '7fbQ7yJuEo56rYjrYaEh');
+        const johnDoeVoice = voices.find(v => v.voice_id === 'EiNlNiXeDU1pqqOPrYMO');
         const defaultVoice = johnDoeVoice || voices[0] || null;
         
         setState(prev => ({

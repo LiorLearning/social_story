@@ -1,4 +1,4 @@
-export interface StoryPage {
+export interface SpreadPage {
   type: 'spread';
   left: {
     image: string;
@@ -11,6 +11,18 @@ export interface StoryPage {
   };
 }
 
+export interface FinalPage {
+  type: 'final';
+  image: string;
+  alt: string;
+  title: string;
+  subtitle?: string;
+  text: string;
+  audio?: string | null;
+}
+
+export type StoryPage = SpreadPage | FinalPage;
+
 export interface StoryBook {
   id: string;
   title: string;
@@ -21,7 +33,7 @@ export interface StoryBook {
 export const storyBooks: Record<string, StoryBook> = {
   "1": {
     id: "1",
-    title: "Reese & the Geyser Eggs of Yellowstone",
+    title: "Geyser Eggs of Yellowstone - Part 2",
     cover: "/covers/Reese-Adv.png",
     pages: [
       {
@@ -31,7 +43,7 @@ export const storyBooks: Record<string, StoryBook> = {
           alt: "Reese and Oli running through misty Yellowstone at night with the Buffalo Dragon pursuing them" 
         },
         right: {
-          text: "Night dropped over Yellowstone. Steam drifted like ghosts between pines. The Buffalo Dragon snorted, FWOOMP, and dust jumped. Reese grabbed Oli's hand. \"Do not look back.\" Hooves drummed nearer. Stars blinked like watchful eyes. They cut between hissing vents, breath burning, as the ground shivered like something huge rolled beneath it.",
+          text: "Night dropped over Yellowstone. Steam drifted between the pines as a Buffalo Dragon rose, hide hot as a stove and breath like a hot spring. Oli froze, but Reese stayed steady and took his hand. \"Do not look back,\" Reese said, leading him toward the geyser field.",
           dropCap: true,
           audio: null
         }
@@ -43,7 +55,7 @@ export const storyBooks: Record<string, StoryBook> = {
           alt: "The Buffalo Dragon charging with lowered horns while Reese and Oli hide behind a boulder" 
         },
         right: {
-          text: "The dragon lowered its horns and charged. Heat brushed their necks. Reese yanked Oli behind a boulder. Silence, then gravel scraped. The beast circled. \"Why us\" Oli whispered. A whistle rose from angry water. Reese peeked. The dragon's gaze was not hungry. It was herding them toward the geyser fields on purpose.",
+          text: "The dragon lowered its horns and charged, heat brushing their necks. Reese pulled Oli behind a boulder and listened. A thin whistle rose from the vents. The beast was not hunting them; it was pushing them toward the geysers on purpose.",
           audio: null
         }
       },
@@ -54,7 +66,7 @@ export const storyBooks: Record<string, StoryBook> = {
           alt: "A pale, egg-shaped boulder glowing in the mist among steaming geysers" 
         },
         right: {
-          text: "Steam kissed their faces. Geysers coughed, pssshh, pssshh, like sleepy giants. A pale boulder gleamed ahead, egg smooth and moon shiny. Reese pressed his palm to it and a tingle raced his arm. The surface quivered, a knock from inside. Another knock answered from the ground. \"Not a rock,\" Reese breathed.",
+          text: "Steam kissed their faces as a pale boulder gleamed ahead, smooth as an egg. Reese pressed his palm to it and a tingle ran up his arm. The shell quivered. A knock sounded inside, and another knock answered from the ground.",
           audio: null
         }
       },
@@ -65,7 +77,7 @@ export const storyBooks: Record<string, StoryBook> = {
           alt: "Reese inserting colorful crystals into sockets on the glowing egg" 
         },
         right: {
-          text: "\"Sockets,\" Oli murmured, pointing to tiny holes. Reese pulled blue, green, and red crystals from his pouch, their trip treasures. \"Pattern\" The egg hummed when blue touched, brighter with green, then sang with red. Across the mist, other mounds winked awake. Geysers inhaled together. The valley stilled, listening for the next click.",
+          text: "\"Sockets,\" Oli said, pointing to tiny round holes. Reese took blue, green, and red crystals from his pouch and set them in place. Blue made the egg hum, green made it glow, and red made it sing. Across the mist, other mounds seemed to wake while the valley held its breath.",
           audio: null
         }
       },
@@ -76,7 +88,7 @@ export const storyBooks: Record<string, StoryBook> = {
           alt: "A dragon hatching from the egg in an explosion of steam and light" 
         },
         right: {
-          text: "Click. Click. Click. The egg glowed. BOOM. Lightning cracks raced and steam exploded. A dragon unfolded, wet wings, lantern eyes, breath like fog. It blinked at Reese, then toward the circling Buffalo Dragon. From the hills, faint knocks replied. More eggs answered. Oli swallowed. \"Did we start a chorus or an avalanche\"",
+          text: "A last click answered and the egg cracked wide. Steam burst as a dragon unfolded with wet wings and bright eyes. It looked at Reese, then at the circling Buffalo Dragon. From the hills came faint knocks, and more eggs replied.",
           audio: null
         }
       },
@@ -87,7 +99,7 @@ export const storyBooks: Record<string, StoryBook> = {
           alt: "The newborn dragon firing a geyser comet while facing the Buffalo Dragon" 
         },
         right: {
-          text: "The newborn spun and fired a geyser comet, WHOOSH, sparkling water arcing like a liquid rainbow. Not fire, hot spray and thunder. The Buffalo Dragon pawed the ground, uncertain. One ancient dragon faced one shining new dragon. Reese felt the ground tapping again. Eggs counted and waited. \"We have seconds,\" he said.",
+          text: "The newborn spun and sent a geyser comet into the sky. Water arced like a rainbow as the Buffalo Dragon pawed the ground, unsure. Old met new across the steaming field. Reese felt the tapping again and knew the eggs were counting; \"We have seconds,\" he said.",
           audio: null
         }
       },
@@ -98,7 +110,7 @@ export const storyBooks: Record<string, StoryBook> = {
           alt: "Reese offering a smooth bone to the Buffalo Dragon as a peace gesture" 
         },
         right: {
-          text: "Near the cone lay a smooth, heavy bone. Reese lifted it with both hands and stepped forward, heart banging. \"Peace,\" he said, offering the gift. Crunch. The Buffalo Dragon chewed, ears tilting. Its gaze softened, barely. Steam ringed them like a drawn circle. \"One minute,\" Reese whispered. \"Make it count.\"",
+          text: "Near the cone lay a smooth, heavy bone. Reese lifted it with both hands and stepped forward. \"Peace,\" he said, offering the gift as the Buffalo Dragon chewed and its ears tilted. Steam drew a ring around them and trust grew for one hard minute.",
           audio: null
         }
       },
@@ -109,9 +121,18 @@ export const storyBooks: Record<string, StoryBook> = {
           alt: "Reese and Oli riding the geyser dragon through silver mist while the Buffalo Dragon watches from below" 
         },
         right: {
-          text: "The geyser dragon's eyes warmed. It knelt, ridged back steaming. Reese climbed on and Oli wrapped his waist. Wings unfurled, scattering moonlit mist. Below, eggs glittered like stars fallen into earth. Above, the Buffalo Dragon watched, not hunting, guarding. They rose through silver vapor as distant knocks quickened. The valley would wake soon.",
+          text: "The geyser dragon's eyes warmed and it knelt. Reese climbed on and Oli held tight as wings lifted them through silver mist. Below, the Buffalo Dragon kept watch while the eggs glowed like little hearths. Somewhere deep, a slow knock answered, gentle and patient, as if something was still waiting for Reese to return.",
           audio: null
         }
+      },
+      {
+        type: "final",
+        image: "/covers/Reese-Adv8.png",
+        alt: "Reese and Oli riding the geyser dragon through silver mist",
+        title: "Karaoke Ending",
+        subtitle: "Reese & Oli",
+        text: "The geyser dragon's eyes warmed. Wings unfurled, scattering moonlit mist. Below, eggs glittered like stars fallen into earth. The valley would wake soon.",
+        audio: null
       }
     ]
   },
@@ -123,11 +144,11 @@ export const storyBooks: Record<string, StoryBook> = {
       {
         type: "spread",
         left: { 
-          image: "/covers/Connor-banana.png", 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252FConnor%252F20250917_235608.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
           alt: "Banana the Third with his red Santa hat in the jungle with gorillas, otters, and elephants" 
         },
         right: {
-          text: "Banana the Third tipped his red Santa hat. \"Adventure o clock.\" Gorillas thumped like bongo drums. Otters waddled like jelly beans. Elephants rumbled like tummy growls before lunch. Vines dangled. Mist smelled like wet secrets. Banana winked. \"Jungle, bring it.\" The jungle said nothing. Which is how jungles say yes.",
+          text: "Banana the III is ready. He tips his Santa hat and grins. \"Adventure o'clock,\" he says. His crew surrounds him—gorillas thump, otters waddle, elephants rumble. Vines hang low and the mist smells like wet secrets. Banana winks. \"Jungle, bring it on.\" But is the team ready for the surprises ahead?",
           dropCap: true,
           audio: null
         }
@@ -135,79 +156,88 @@ export const storyBooks: Record<string, StoryBook> = {
       {
         type: "spread",
         left: { 
-          image: "/covers/Connor-banana.png",
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252FConnor%252F20250917_235841.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN",
           alt: "Ancient temple interior with torches and dancing shadows on carved walls" 
         },
         right: {
-          text: "Inside the temple, torches went fssst pop. Shadows did the wiggle dance on lions, turtles, and a goat who clearly took tap lessons. \"Very old,\" Banana whispered. The floor purred. Somewhere, claws clicked. \"Surprises ahead,\" Banana said. He grinned so big his hat almost fell off. Almost.",
+          text: "They step inside the temple. Torches go fssst-pop and shadows wiggle on lions, turtles, and a tap-dancing goat. \"Very old,\" Banana whispers as the floor gives a soft purr. Far down the hall, claws click. Two green eyes blink, slow and sure.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Connor-banana.png",
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252FConnor%252Fgenerated_image_20241202_235552.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN",
           alt: "Xuro the jaguar leaping from a cracked arch with shiny teeth" 
         },
         right: {
-          text: "Xuro the jaguar leaped from a cracked arch, teeth shiny like tiny moons. \"The treasure is mine,\" he roared. Banana raised his lantern. \"Sharing is caring. Also, I have snacks.\" Xuro blinked. \"Snacks\" \"Team snacks,\" Banana added. Xuro's tail swished. Translation: he was thinking about treasure and snacks at the same time.",
+          text: "The eyes belong to Xuro the jaguar. He leaps from a cracked arch, teeth like tiny moons. \"The treasure is mine,\" he roars. Banana lifts his lantern. \"Sharing is caring. Also… snacks.\" Xuro's tail swishes once. He is listening.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Connor-banana.png",
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252FConnor%252F20250918_000525.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN",
           alt: "Gorillas drumming, elephants stomping, otters squeaking in the temple" 
         },
         right: {
-          text: "Gorillas drummed boom boom boom. Elephants stomped thud thud thud. Otters squeaked like rubber ducks at a birthday party. The echo zipped down the hall and came back wearing a new beat. Xuro half smiled. \"The temple likes our music,\" Banana said. \"Or our snacks,\" an otter squeaked hopefully.",
+          text: "Drums answer first. Gorillas boom-boom and elephants stomp thud-thud while otters squeak like birthday ducks. Echoes race the walls and swirl back with a new beat. \"The temple likes our music,\" Banana says, smiling. Xuro's whiskers twitch as he listens for the next move.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Connor-banana.png",
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252FConnor%252F20250918_001225.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN",
           alt: "Temple walls coming alive with glowing maze patterns" 
         },
         right: {
-          text: "Walls whooooshed alive. Glowing lines slid together, a maze drawing itself like lightning practicing cursive. \"Puzzle party,\" Banana said. \"Temple, show us your best dance.\" Patterns pulsed. A doorway breathed open, then closed. \"After you,\" Banana bowed. The doorway stayed open. Good manners are powerful. Remember that, doors.",
+          text: "The walls wake with a whooosh. Glowing lines slide into a quick, bright maze. \"Puzzle party,\" Banana says. \"Show us the way.\" Patterns pulse and a doorway breathes open, then shut. Banana bows and says, \"After you.\" The door stays open. Good manners work.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Connor-banana.png",
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252FConnor%252F20250918_002826.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN",
           alt: "Team of animals working together solving temple puzzles" 
         },
         right: {
-          text: "Team time. Gorillas nudged mega blocks. Otters slip slid through tiny tunnels and booped secret levers. Elephants lifted stones like marshmallows. Proud faces everywhere. Banana called plays. \"Left. Lift. Otter express.\" Click. Clack. Ker chunk. The floor rolled away, like a tongue saying wow. \"Deeper please,\" whispered the temple.",
+          text: "Beyond the door, the floor turns into a job. Gorillas nudge mega blocks into place. Otters zip through tiny tunnels and boop hidden levers. Elephants lift stones like soft marshmallows, steady and proud. \"Left. Lift. Otter express,\" Banana calls. Click. Clack. Ker-chunk. The floor rolls back and whispers, \"Deeper, please.\"",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Connor-banana.png",
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252FConnor%252F20250918_003552.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN",
           alt: "Giant door opening while elephants block Xuro with their rumps" 
         },
         right: {
-          text: "A giant door groaned, creeeak. Maybe it needed a snack too. Xuro pounced. Elephants lined up rump to rump, a perfect wall. \"Denied,\" Banana said, very politely. Xuro melted into shadow. \"Round two later,\" Banana whispered. Dust sparkled. Toes tiptoed. Even bravest heroes tiptoe sometimes. It is allowed.",
+          text: "Deeper waits a giant door that groans and creaks. Xuro springs, but the elephants line up rump to rump and make a perfect wall. \"Denied,\" Banana says, very polite. Xuro melts into shadow. \"Round two later,\" Banana whispers as dust sparkles and toes tiptoe. Even heroes tiptoe. It's allowed.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Connor-banana.png",
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252FConnor%252F20250918_012600.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN",
           alt: "Golden owl statue with spread wings and a mysterious black crystal in an open chest" 
         },
         right: {
-          text: "The wow room. A golden owl spread shiny wings. Eyes blinked like twin flashlights. \"Only true hearts may see the treasure,\" it boomed. The chest snapped open. No coins. No crowns. A black crystal pulsed. Thump. Thump. Torches fizzled. A friendly voice curled through the dark. \"Finally. Guests.\"",
+          text: "They tiptoe into the wow room. A golden owl spreads bright wings and its eyes blink like twin flashlights. \"Only true hearts may see the treasure,\" it booms. The chest snaps open—no coins, no crowns. A black crystal pulses. Thump. Thump. Torches fizzle. A kind voice curls through the dark and says, \"Finally… guests.\"",
           audio: null
         }
+      },
+      {
+        type: "final",
+        image: "/covers/Connor-banana.png",
+        alt: "Banana the Third with his red Santa hat in the jungle",
+        title: "Karaoke Ending",
+        subtitle: "The Banana Monkey",
+        text: "Verse 1. Swing, swing, swing through the jungle trees. Banana Monkey's laughing in the breeze. Drums go boom, and the vines go snap. Clap your hands with a jungle clap! Chorus. Hey, hey, jungle play. Sing and dance the monkey way! Treasure shines and friends are near. Adventure time is finally here! Verse 2. Here comes Jaguar, sneaky and sly. Watching with his clever eye. But when the team all sings along. Even jaguars can join the song! Chorus. Hey, hey, jungle play. Sing and dance the monkey way! Treasure shines and friends are near. Adventure time is finally here! Bridge. Otters squeak, elephants stomp. Gorillas drum with a jungle thomp! Glow of torches, puzzles bright. The jungle sings with all its might! Final Chorus. Hey, hey, jungle play. Sing and dance the monkey way! Banana Monkey leads the cheer. Adventure time is always here!",
+        audio: "/covers/audio/banana-monkey.mp3"
       }
     ]
   },
@@ -326,6 +356,15 @@ export const storyBooks: Record<string, StoryBook> = {
           text: "Lightning-quick, Snappy struck. Glass burst into stars; the cruel one reeled. The maze cracked, seams glowing white. \"Go!\" Jane shouted. They sprinted through bending halls to a final door—night air, cold and real. A bus idled; doors sealed behind them. Safe… maybe. In the window's reflection, Miss Thornton smiled. Far behind, a green heartbeat counted backward.",
           audio: null
         }
+      },
+      {
+        type: "final",
+        image: "/covers/Gaia-School.png",
+        alt: "The children escaping through a final door as the school crumbles behind them",
+        title: "Karaoke Ending",
+        subtitle: "The Mischievous Teacher",
+        text: "Lightning-quick, Snappy struck. Glass burst into stars. They sprinted through bending halls to a final door. Safe… maybe.",
+        audio: null
       }
     ]
   },
@@ -389,6 +428,15 @@ export const storyBooks: Record<string, StoryBook> = {
           text: "From that day on, Siku visited John every week. She taught him about friendship and warmth that comes from the heart, not from fire. And John learned that being different didn't make him a monster - it made him special, a guardian of the beautiful frozen world.",
           audio: null
         }
+      },
+      {
+        type: "final",
+        image: "/covers/Icyterrain.png",
+        alt: "John Doe and Siku becoming friends in the frozen landscape",
+        title: "Karaoke Ending",
+        subtitle: "John Doe, the Ice Monster",
+        text: "Siku visited John every week. She taught him about friendship and warmth. John learned that being different made him special.",
+        audio: null
       }
     ]
   },
@@ -400,11 +448,11 @@ export const storyBooks: Record<string, StoryBook> = {
       {
         type: "spread",
         left: { 
-          image: "/covers/Mila-and-Vivienne.png", 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250919_222814.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
           alt: "Two sisters with backpacks standing at the edge of a magical forest" 
         },
         right: {
-          text: "Mila and Vivienne were sisters who shared everything - their room, their secrets, and most importantly, their love for adventure. Every summer, they would pack their matching backpacks and set off to explore the mysterious Whispering Woods behind their grandmother's house.",
+          text: "The sun felt like a warm hug, and the meadow was a giant green pillow. Mila dribbled fast—tap-tap-tap! Vivienne raced behind her, laughing loud. \"Too slow!\" Mila shouted. Their feet thudded like drums, kicking up daisies and giggles as the ball sped into the tall grass. It was just another perfect soccer afternoon—until it wasn't.",
           dropCap: true,
           audio: null
         }
@@ -412,46 +460,44 @@ export const storyBooks: Record<string, StoryBook> = {
       {
         type: "spread",
         left: { 
-          image: "/covers/Mila-and-Vivienne.png", 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250919_225219.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
           alt: "The sisters discovering a hidden path marked by glowing stones" 
         },
         right: {
-          text: "This year was different. As they ventured deeper into the woods than ever before, they discovered a path marked by stones that glowed with soft, blue light. 'Look, Vivi!' whispered Mila. 'These stones are warm, even though it's cool in the shade.'",
+          text: "\"Goal!\" they cheered, kicking between two dandelions. The pretend \"mud monster\" and \"tree goalie\" didn't stand a chance! From the branches, birds flapped skyward. Fireflies blinked early, sprinkling golden sparks. High-fives flew as laughter echoed across the meadow. Mila beamed. \"Best match ever!\" But just as the fireflies danced brighter… the air began to shift.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Mila-and-Vivienne.png", 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250919_233800.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
           alt: "A hidden valley with a crystal-clear lake and floating islands" 
         },
         right: {
-          text: "The glowing path led them to a hidden valley where a crystal-clear lake reflected the sky like a mirror. But the most amazing sight was the tiny islands floating in the air above the water, each one covered with flowers that chimed like bells in the breeze.",
+          text: "Mila kicked one last shot—fwip! The ball zipped into the grass and vanished. Vivienne chased, then froze. \"Mila…\" she whispered. Silver mist curled like a sleeping dragon's breath. It shimmered—glow-y, whisper-y, full of secrets. The ball was gone. They stepped closer, hearts pounding. Mist moved like it had a mind. Something waited.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Mila-and-Vivienne.png", 
-          alt: "The sisters carefully stepping onto a floating island" 
-        },
-        right: {
-          text: "Vivienne, who was always the braver of the two, stepped onto the lowest floating island. To their amazement, it held her weight perfectly! Soon both sisters were island-hopping through the air, their laughter echoing across the magical valley.",
-          audio: null
-        }
-      },
-      {
-        type: "spread",
-        left: { 
-          image: "/covers/Mila-and-Vivienne.png", 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250922_211945.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
           alt: "The sisters writing in their adventure diary under a starry sky" 
         },
         right: {
-          text: "That night, they camped under the stars and wrote in their adventure diary: 'Today we discovered that the most magical places are found when you're brave enough to follow the unknown path, and the best adventures are the ones you share with someone you love.'",
+          text: "Shoulder to shoulder, Mila squeezed Vivienne's hand. The mist shivered into an oval shape—a doorway made of starlight. Inside, something flickered fast like a shadow. \"Do we go in?\" Mila asked. The silver light stretched toward their toes. Sparks floated in the air. Vivienne nodded. Together, they stepped forward—ready for whatever came next.",
           audio: null
         }
+      },
+      {
+        type: "final",
+        image: "/covers/Mila-and-Vivienne.png",
+        alt: "The sisters writing in their adventure diary under a starry sky",
+        title: "Karaoke Ending",
+        subtitle: "Mila and Vivienne's Adventure Diary",
+        text: "They camped under the stars and wrote in their diary. The most magical places are found when you're brave. The best adventures are shared with someone you love.",
+        audio: null
       }
     ]
   }

@@ -20,12 +20,12 @@ export interface Story {
 export const stories: Story[] = [
   {
     id: "1",
-    title: "Reese & the Geyser Eggs of Yellowstone",
+    title: "Geyser Eggs of Yellowstone - Part 2",
     author: { name: "Reese G", avatar: "/a-js.png" },
     age: "10 years old",
     rating: 4.8,
     reactions: { heart: 8 },
-    comments: 5,
+    comments: 4,
     cover: "/covers/Reese-Adv.png",
     country: "USA",
     badge: "Trending"
@@ -37,7 +37,7 @@ export const stories: Story[] = [
     age: "10 years old",
     rating: 4.7,
     reactions: { heart: 15 },
-    comments: 12,
+    comments: 5,
     cover: "/covers/Connor-banana.png",
     country: "USA"
   },

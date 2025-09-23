@@ -22,7 +22,7 @@ class ElevenLabsService {
   constructor() {
     this.config = {
       apiKey: import.meta.env.VITE_ELEVENLABS_API_KEY || '',
-      voiceId: '7fbQ7yJuEo56rYjrYaEh', // Default to John Doe voice
+      voiceId: 'EiNlNiXeDU1pqqOPrYMO', // Default to John Doe voice
       model: 'eleven_multilingual_v2',
       stability: 0.5,
       similarityBoost: 0.8,

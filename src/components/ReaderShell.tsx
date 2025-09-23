@@ -171,7 +171,7 @@ export const ReaderShell: React.FC = () => {
     >
 
       <ReadAloudEngine
-        text={currentPage.right.text}
+        text={currentPage.type === 'spread' ? currentPage.right.text : ''}
         onWordHighlight={handleWordHighlight}
         onComplete={handleReadAloudComplete}
       >
@@ -184,6 +184,9 @@ export const ReaderShell: React.FC = () => {
               totalPages={story.pages.length}
               readAloudState={readAloudState}
               readAloudControls={readAloudControls}
+              storyTitle={story.title}
+              pageImage={currentPage.type === 'spread' ? currentPage.left.image : currentPage.image}
+              storyId={story.id}
             />
             
             {/* Read-Only Mode Toggle */}
@@ -214,12 +217,12 @@ export const ReaderShell: React.FC = () => {
             <div
               className="stage"
               style={{
-                paddingTop: '70px',
+                paddingTop: '88px',
                 minHeight: '100vh',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '70px 10px 20px',
+                padding: '88px 10px 20px',
                 position: 'relative',
                 zIndex: 2
               }}
