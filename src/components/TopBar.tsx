@@ -205,10 +205,14 @@ export const TopBar: React.FC<TopBarProps> = ({
         zIndex: 50,
         display: 'flex',
         alignItems: 'center',
-        padding: '0 16px',
-        gap: '12px',
+        padding: '0 clamp(12px, 3vw, 16px)',
+        gap: 'clamp(8px, 2vw, 12px)',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        animation: 'slideDown 300ms ease-out'
+        animation: 'slideDown 300ms ease-out',
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingLeft: 'max(clamp(12px, 3vw, 16px), env(safe-area-inset-left))',
+        paddingRight: 'max(clamp(12px, 3vw, 16px), env(safe-area-inset-right))',
+        overflowX: 'hidden'
       }}
     >
       {/* Back Button */}
@@ -238,43 +242,63 @@ export const TopBar: React.FC<TopBarProps> = ({
       </button>
 
       {/* Avatar + Title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(6px, 1.5vw, 8px)', minWidth: 0, flexShrink: 1 }}>
         <div style={{ 
-          width: '32px', 
-          height: '32px', 
+          width: 'clamp(28px, 6vw, 32px)', 
+          height: 'clamp(28px, 6vw, 32px)', 
           borderRadius: '50%', 
           backgroundColor: surfaceColor,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '20px'
+          fontSize: 'clamp(16px, 4vw, 20px)',
+          flexShrink: 0
         }}>
           {storyTheme.avatar}
         </div>
         <span style={{ 
           color: textColor, 
-          fontSize: '18px', 
+          fontSize: 'clamp(14px, 3.5vw, 18px)', 
           fontWeight: '600',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          maxWidth: '200px'
+          maxWidth: 'clamp(120px, 25vw, 200px)',
+          minWidth: 0
         }}>
           {storyTitle}
         </span>
       </div>
 
-      {/* Progress Section */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, justifyContent: 'center' }}>
+      {/* Progress Section - Responsive with horizontal scroll */}
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 'clamp(8px, 2vw, 16px)', 
+        flex: 1, 
+        justifyContent: 'center',
+        minWidth: 0,
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
+      }}>
         <span style={{ 
           color: textColor, 
-          fontSize: '18px', 
+          fontSize: 'clamp(14px, 3.5vw, 18px)', 
           fontWeight: '600',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          flexShrink: 0
         }}>
           Page {currentPage} of {totalPages}
         </span>
-        <div style={{ display: 'flex', gap: '4px' }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: 'clamp(2px, 1vw, 4px)',
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          flexShrink: 0
+        }}>
           {progressIndicators}
         </div>
       </div>
@@ -297,40 +321,46 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
       )}
 
-      {/* Hear Story Button */}
+      {/* Hear Story Button - Responsive */}
       <button
         onClick={handleListenClick}
         style={{
-          height: '48px',
-          padding: '0 20px',
-          borderRadius: '24px',
+          height: 'clamp(44px, 10vw, 48px)',
+          padding: '0 clamp(12px, 4vw, 20px)',
+          borderRadius: 'clamp(22px, 5vw, 24px)',
           backgroundColor: '#10B981',
           color: 'white',
           border: 'none',
-          fontSize: '18px',
+          fontSize: 'clamp(14px, 3.5vw, 18px)',
           fontWeight: '600',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: 'clamp(4px, 1.5vw, 8px)',
           cursor: 'pointer',
           transition: 'all 200ms ease',
           outline: 'none',
-          animation: readAloudState.isPlaying ? 'none' : 'pulse 2s infinite'
+          animation: readAloudState.isPlaying ? 'none' : 'pulse 2s infinite',
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+          minWidth: '44px'
         }}
         onFocus={(e) => e.currentTarget.style.outline = `2px solid ${textColor}`}
         onBlur={(e) => e.currentTarget.style.outline = 'none'}
         aria-label={readAloudState.isPlaying ? "Pause" : "Hear Story"}
       >
         {readAloudState.isPlaying ? <Pause size={20} /> : <Volume2 size={20} />}
-        {readAloudState.isPlaying ? 'Pause' : 'Hear Story'}
+        <span className="hidden xs:inline">
+          {readAloudState.isPlaying ? 'Pause' : 'Hear Story'}
+        </span>
         {readAloudState.isPlaying && (
           <span style={{
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
             padding: '2px 6px',
             borderRadius: '8px',
-            fontSize: '12px',
+            fontSize: 'clamp(10px, 2.5vw, 12px)',
             marginLeft: '4px'
-          }}>
+          }}
+          className="hidden sm:inline">
             0:15
           </span>
         )}
@@ -497,10 +527,23 @@ export const TopBar: React.FC<TopBarProps> = ({
           to { transform: translateY(0); opacity: 1; }
         }
         
+        /* Hide scrollbars for progress section */
+        .top-bar div::-webkit-scrollbar {
+          display: none;
+        }
+        
         @media (max-width: 640px) {
           .top-bar {
             padding: 0 12px !important;
-            gap: 8px !important;
+            gap: 6px !important;
+            height: 64px !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .top-bar {
+            padding: 0 8px !important;
+            gap: 4px !important;
           }
         }
       `}</style>

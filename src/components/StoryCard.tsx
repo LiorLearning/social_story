@@ -71,7 +71,7 @@ const StoryCard = ({ story }: StoryCardProps) => {
   return (
     <>
     <article 
-      className="story-card bg-white rounded-3xl shadow-soft overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg h-full"
+      className="story-card bg-white rounded-2xl sm:rounded-3xl shadow-soft overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg h-full"
       style={{ 
         display: 'grid', 
         gridTemplateRows: 'auto 1fr auto',
@@ -84,24 +84,25 @@ const StoryCard = ({ story }: StoryCardProps) => {
           src={story.cover}
           alt={story.title}
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ borderRadius: '20px 20px 0 0' }}
+          style={{ borderRadius: 'clamp(16px, 3vw, 20px) clamp(16px, 3vw, 20px) 0 0' }}
           loading="lazy"
         />
         
         {/* Badge - top left with max-width constraint */}
         {story.badge && (
           <div 
-            className="absolute top-3 left-3"
+            className="absolute top-2 sm:top-3 left-2 sm:left-3"
             style={{ maxWidth: '70%' }}
           >
             <Badge 
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 shadow-md text-xs font-medium px-2 py-1"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 shadow-md text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1"
               style={{
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 minWidth: 0,
-                lineHeight: 1
+                lineHeight: 1,
+                fontSize: 'clamp(10px, 2.5vw, 12px)'
               }}
               title={story.badge}
             >
@@ -112,22 +113,23 @@ const StoryCard = ({ story }: StoryCardProps) => {
         
         {/* Rating chip - top right */}
         <div 
-          className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium text-slate-700"
+          className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-medium text-slate-700"
           style={{ 
             whiteSpace: 'nowrap',
-            lineHeight: 1
+            lineHeight: 1,
+            fontSize: 'clamp(10px, 2.5vw, 12px)'
           }}
         >
-          <Star className="w-3 h-3 fill-amber-400 text-amber-400 flex-shrink-0" />
+          <Star className="w-2.5 sm:w-3 h-2.5 sm:h-3 fill-amber-400 text-amber-400 flex-shrink-0" />
           <span style={{ minWidth: 0 }}>{story.rating}</span>
         </div>
       </div>
 
       {/* Body: Content area */}
-      <div className="p-4 flex flex-col gap-3" style={{ minHeight: 0 }}>
+      <div className="p-3 sm:p-4 flex flex-col gap-2 sm:gap-3" style={{ minHeight: 0 }}>
         {/* Title - 2 line clamp with ellipsis */}
         <h3 
-          className="text-lg font-semibold text-slate-900 leading-tight"
+          className="text-base sm:text-lg font-semibold text-slate-900 leading-tight"
           style={{
             display: '-webkit-box',
             WebkitLineClamp: 2,
@@ -135,7 +137,8 @@ const StoryCard = ({ story }: StoryCardProps) => {
             overflow: 'hidden',
             overflowWrap: 'anywhere',
             lineHeight: '1.25',
-            minHeight: '2.5rem' // Reserve space for 2 lines
+            minHeight: 'clamp(2rem, 5vw, 2.5rem)', // Reserve space for 2 lines
+            fontSize: 'clamp(14px, 3.5vw, 18px)'
           }}
           title={story.title}
         >
@@ -145,16 +148,16 @@ const StoryCard = ({ story }: StoryCardProps) => {
         {/* Author and Meta */}
         <div className="flex items-center gap-3" style={{ minWidth: 0 }}>
           {/* Avatar */}
-          <div className="relative w-8 h-8 flex-shrink-0">
+          <div className="relative w-6 sm:w-8 h-6 sm:h-8 flex-shrink-0">
             <div className="w-full h-full rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-              <span className="text-xs font-semibold text-indigo-700" style={{ lineHeight: 1 }}>
+              <span className="text-xs font-semibold text-indigo-700" style={{ lineHeight: 1, fontSize: 'clamp(10px, 2.5vw, 12px)' }}>
                 {story.author.name.split(' ').map(n => n[0]).join('')}
               </span>
             </div>
           </div>
           
           {/* Author name and meta - with proper truncation */}
-          <div className="flex items-center gap-2 text-sm text-slate-600" style={{ minWidth: 0, flex: 1 }}>
+          <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-slate-600" style={{ minWidth: 0, flex: 1 }}>
             <span 
               className="font-medium"
               style={{
@@ -162,35 +165,38 @@ const StoryCard = ({ story }: StoryCardProps) => {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 minWidth: 0,
-                maxWidth: '120px'
+                maxWidth: 'clamp(80px, 20vw, 120px)',
+                fontSize: 'clamp(11px, 2.5vw, 14px)'
               }}
               title={story.author.name}
             >
               {story.author.name}
             </span>
-            <span className="text-slate-400 flex-shrink-0">•</span>
+            <span className="text-slate-400 flex-shrink-0 hidden xs:inline">•</span>
             <span 
-              className="flex-shrink-0"
+              className="flex-shrink-0 hidden xs:inline"
               style={{
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                minWidth: 0
+                minWidth: 0,
+                fontSize: 'clamp(11px, 2.5vw, 14px)'
               }}
             >
               {story.age}
             </span>
-            <span className="text-slate-400 flex-shrink-0">•</span>
+            <span className="text-slate-400 flex-shrink-0 hidden sm:inline">•</span>
             <Badge 
               variant="secondary" 
-              className="px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-600 border-0 flex-shrink-0"
+              className="px-1.5 sm:px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-600 border-0 flex-shrink-0 hidden sm:inline-flex"
               style={{
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 minWidth: 0,
                 maxWidth: '80px',
-                lineHeight: 1
+                lineHeight: 1,
+                fontSize: 'clamp(10px, 2vw, 12px)'
               }}
               title={story.country}
             >
@@ -202,19 +208,19 @@ const StoryCard = ({ story }: StoryCardProps) => {
 
       {/* Action Bar - pinned to bottom */}
       <div 
-        className="p-4 pt-0"
+        className="p-3 sm:p-4 pt-0"
         style={{ 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '12px',
+          gap: 'clamp(8px, 2vw, 12px)',
           flexWrap: 'nowrap',
-          minHeight: '52px'
+          minHeight: 'clamp(48px, 10vw, 52px)'
         }}
       >
         {/* Left: Action Pills */}
         <div 
-          className="flex items-center gap-3"
+          className="flex items-center gap-2 sm:gap-3"
           style={{ 
             flexWrap: 'nowrap',
             minWidth: 0,
@@ -225,13 +231,13 @@ const StoryCard = ({ story }: StoryCardProps) => {
           <button
             onClick={handleLove}
             className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+              "flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 tap-target",
               isLoved 
                 ? "bg-red-50 text-red-600 hover:bg-red-100" 
                 : "bg-slate-50 text-slate-600 hover:bg-slate-100"
             )}
             style={{
-              minHeight: '40px',
+              minHeight: '44px',
               minWidth: '44px',
               whiteSpace: 'nowrap',
               flexShrink: 0,
@@ -242,12 +248,12 @@ const StoryCard = ({ story }: StoryCardProps) => {
           >
             <Heart 
               className={cn(
-                "w-4 h-4 transition-all duration-200 flex-shrink-0",
+                "w-3 sm:w-4 h-3 sm:h-4 transition-all duration-200 flex-shrink-0",
                 isLoved ? "fill-current" : ""
               )} 
             />
-            <span className="text-sm font-medium">
-              Love {formatNumber(loveCount)}
+            <span className="text-xs sm:text-sm font-medium" style={{ fontSize: 'clamp(11px, 2.5vw, 14px)' }}>
+              <span className="hidden xs:inline">Love </span>{formatNumber(loveCount)}
             </span>
           </button>
 
@@ -255,9 +261,9 @@ const StoryCard = ({ story }: StoryCardProps) => {
           {story.comments > 0 && (
             <button
               onClick={handleComments}
-              className="flex items-center gap-2 px-3 py-2 rounded-full bg-slate-50 text-slate-600 hover:bg-slate-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-full bg-slate-50 text-slate-600 hover:bg-slate-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 tap-target"
               style={{
-                minHeight: '40px',
+                minHeight: '44px',
                 minWidth: '44px',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
@@ -266,9 +272,12 @@ const StoryCard = ({ story }: StoryCardProps) => {
               aria-label="Open comments"
               title="Open comments"
             >
-              <MessageCircle className="w-4 h-4 flex-shrink-0" />
-              <span className="text-sm font-medium">
+              <MessageCircle className="w-3 sm:w-4 h-3 sm:h-4 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium hidden xs:inline" style={{ fontSize: 'clamp(11px, 2.5vw, 14px)' }}>
                 Comments {formatNumber(story.comments)}
+              </span>
+              <span className="text-xs font-medium xs:hidden" style={{ fontSize: 'clamp(11px, 2.5vw, 14px)' }}>
+                {formatNumber(story.comments)}
               </span>
             </button>
           )}
@@ -277,12 +286,13 @@ const StoryCard = ({ story }: StoryCardProps) => {
         {/* Right: Read Button */}
         <Button
           onClick={handleRead}
-          className="rounded-full px-4 py-2 font-bold transition-all duration-200 flex-shrink-0 text-white shadow-md bg-[#22C55E] hover:bg-[#1FAA4B] active:bg-[#189A42] focus:ring-[#A7F3D0] hover:shadow-green-200 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          className="rounded-full px-3 sm:px-4 py-2 font-bold transition-all duration-200 flex-shrink-0 text-white shadow-md bg-[#22C55E] hover:bg-[#1FAA4B] active:bg-[#189A42] focus:ring-[#A7F3D0] hover:shadow-green-200 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 tap-target"
           style={{
-            minHeight: '46px',
+            minHeight: '44px',
             minWidth: '44px',
             whiteSpace: 'nowrap',
-            lineHeight: 1
+            lineHeight: 1,
+            fontSize: 'clamp(12px, 3vw, 16px)'
           }}
           aria-label="Read story"
           title="Read story"

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Mic, MicOff, Square } from 'lucide-react';
 import { WordHighlighter } from './WordHighlighter';
 import { SpreadPage } from '@/data/storyPages';
@@ -13,6 +13,8 @@ interface SpreadProps {
   pageNumber: number;
   totalPages: number;
   readOnlyMode?: boolean;
+  externalReadingAccuracy?: number | null;
+  externalIsRecording?: boolean;
 }
 
 export const Spread: React.FC<SpreadProps> = ({
@@ -23,7 +25,9 @@ export const Spread: React.FC<SpreadProps> = ({
   highlightedWordIndex,
   pageNumber,
   totalPages,
-  readOnlyMode = false
+  readOnlyMode = false,
+  externalReadingAccuracy = null,
+  externalIsRecording = false
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [readingAccuracy, setReadingAccuracy] = useState<number | null>(null);
@@ -35,6 +39,76 @@ export const Spread: React.FC<SpreadProps> = ({
   // Use useRef to avoid stale closure issues
   const accumulatedTranscriptRef = useRef('');
   const [accumulatedTranscript, setAccumulatedTranscript] = useState<string>('');
+
+  // Use external recording state to drive internal speech recognition
+  useEffect(() => {
+    if (externalIsRecording && !isRecording) {
+      // External recording started, start internal processing
+      setIsRecording(true);
+      setReadingAccuracy(null);
+      setLiveTranscript('');
+      setWordAccuracies([]);
+      accumulatedTranscriptRef.current = '';
+      setAccumulatedTranscript('');
+      
+      speechRecognition.start({
+        onInterimResult: (transcript) => {
+          setLiveTranscript(transcript);
+          // Use ref to get current accumulated transcript (avoid stale closure)
+          const currentAccumulated = accumulatedTranscriptRef.current;
+          const fullTranscript = currentAccumulated + (currentAccumulated ? ' ' : '') + transcript;
+          const accuracies = calculateWordAccuracies(fullTranscript, page.right.text);
+          setWordAccuracies(accuracies);
+        },
+        onResult: (result) => {
+          // Use ref to get current accumulated transcript
+          const currentAccumulated = accumulatedTranscriptRef.current;
+          const newAccumulated = currentAccumulated + (currentAccumulated ? ' ' : '') + result.transcript;
+          
+          // Update both ref and state
+          accumulatedTranscriptRef.current = newAccumulated;
+          setAccumulatedTranscript(newAccumulated);
+          setLiveTranscript(''); // Clear interim transcript
+          
+          // Calculate accuracy based on the full accumulated transcript
+          const accuracy = calculateReadingAccuracy(newAccumulated, page.right.text);
+          const wordAccuracies = calculateWordAccuracies(newAccumulated, page.right.text);
+          
+          setReadingAccuracy(accuracy);
+          setWordAccuracies(wordAccuracies);
+        },
+        onError: (error) => {
+          console.error('Speech recognition error:', error);
+          setIsRecording(false);
+          setLiveTranscript('');
+        },
+        onStart: () => {
+          console.log('Speech recognition started');
+          setIsRecording(true);
+        },
+        onEnd: () => {
+          console.log('Speech recognition ended');
+          setIsRecording(false);
+          if (readingAccuracy !== null) {
+            setSavedAccuracy(readingAccuracy);
+          }
+        },
+        language: 'en-US'
+      });
+    } else if (!externalIsRecording && isRecording) {
+      // External recording stopped, stop internal processing
+      speechRecognition.stop();
+      setIsRecording(false);
+    }
+  }, [externalIsRecording, isRecording, page.right.text]);
+
+  // Sync external accuracy with internal state
+  useEffect(() => {
+    if (externalReadingAccuracy !== null) {
+      setReadingAccuracy(externalReadingAccuracy);
+      setSavedAccuracy(externalReadingAccuracy);
+    }
+  }, [externalReadingAccuracy]);
 
   const handleMicrophoneClick = useCallback(() => {
     if (readOnlyMode) {
@@ -160,10 +234,10 @@ export const Spread: React.FC<SpreadProps> = ({
                 <span
                   style={{
                     float: 'left',
-                    fontSize: '5.6em',
+                    fontSize: 'clamp(3.5em, 8vw, 5.6em)', // Responsive drop cap
                     lineHeight: '0.75',
-                    marginRight: '10px',
-                    marginTop: '8px',
+                    marginRight: 'clamp(6px, 2vw, 10px)', // Responsive margin
+                    marginTop: 'clamp(4px, 1.5vw, 8px)', // Responsive margin
                     fontWeight: '500',
                     fontFamily: '"Georgia", "Times New Roman", serif',
                     color: hasAccuracy 
@@ -362,155 +436,22 @@ export const Spread: React.FC<SpreadProps> = ({
           <div 
             style={{
               fontFamily: '"Georgia", "Times New Roman", serif',
-              fontSize: '26px',
-              lineHeight: '1.7',
+              fontSize: 'clamp(18px, 2.2vw, 26px)', // Responsive font size
+              lineHeight: 'clamp(1.5, 1.6, 1.7)', // Responsive line height
               color: '#1a202c',
-              maxWidth: '40ch',
+              maxWidth: 'clamp(35ch, 45ch, 50ch)', // Responsive max width
               textAlign: 'center',
               letterSpacing: '0.01em',
-              fontWeight: '400'
+              fontWeight: '400',
+              textWrap: 'balance', // Better line breaks
+              hyphens: 'auto', // Handle long words
+              overflowWrap: 'anywhere', // Prevent overflow
+              paddingBottom: 'clamp(80px, 15vw, 120px)' // Space for FAB
             }}
           >
             {renderTextWithFeedback(page.right.text, wordAccuracies, page.right.dropCap)}
           </div>
 
-          {/* Microphone and Transcription Side-by-Side Layout */}
-          <div style={{ 
-            position: 'absolute',
-            bottom: '60px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex', 
-            alignItems: 'center',
-            gap: '20px',
-            zIndex: 10,
-            width: '90%',
-            maxWidth: '500px'
-          }}>
-            {/* Microphone Button */}
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center',
-              flexShrink: 0
-            }}>
-              {/* Feedback Message */}
-              {feedbackMessage && (
-                <div
-                  style={{
-                    marginBottom: '12px',
-                    padding: '6px 12px',
-                    borderRadius: '16px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    textAlign: 'center',
-                    maxWidth: '200px',
-                    backgroundColor: readingAccuracy !== null 
-                      ? readingAccuracy >= 80 
-                        ? '#D1FAE5' // Green background for high accuracy
-                        : readingAccuracy >= 60
-                        ? '#FEF3C7' // Yellow background for medium accuracy
-                        : '#FEE2E2' // Red background for low accuracy
-                      : '#F3F4F6', // Gray background for listening
-                    color: readingAccuracy !== null 
-                      ? readingAccuracy >= 80 
-                        ? '#065F46' // Dark green text
-                        : readingAccuracy >= 60
-                        ? '#92400E' // Dark yellow text
-                        : '#991B1B' // Dark red text
-                      : '#374151', // Dark gray text
-                    border: `2px solid ${
-                      readingAccuracy !== null 
-                        ? readingAccuracy >= 80 
-                          ? '#10B981' // Green border
-                          : readingAccuracy >= 60
-                          ? '#F59E0B' // Yellow border
-                          : '#EF4444' // Red border
-                        : '#9CA3AF' // Gray border
-                    }`
-                  }}
-                >
-                  {feedbackMessage}
-                </div>
-              )}
-              
-              <button
-                onClick={handleMicrophoneClick}
-                disabled={false}
-                className={`flex items-center justify-center w-16 h-16 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  readOnlyMode 
-                    ? 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-300'
-                    : isRecording
-                    ? 'bg-sky-400 hover:bg-sky-500 focus:ring-sky-300'
-                    : readingAccuracy !== null && readingAccuracy >= 80
-                    ? 'bg-green-500 hover:bg-green-600 focus:ring-green-300'
-                    : 'bg-[#22C55E] hover:bg-[#1FAA4B] focus:ring-[#A7F3D0]'
-                }`}
-                aria-label={readOnlyMode ? "Read-only mode" : isRecording ? "Stop recording" : "Start voice recording"}
-                title={readOnlyMode ? "Read-only mode" : isRecording ? "Stop recording" : "Start voice recording"}
-              >
-                {readOnlyMode ? (
-                  <Mic className="w-6 h-6" />
-                ) : isRecording ? (
-                  <Square className="w-5 h-5" fill="currentColor" />
-                ) : (
-                  <Mic className="w-6 h-6" />
-                )}
-              </button>
-            </div>
-
-            {/* Live Transcription Display */}
-            {(isRecording || liveTranscript || accumulatedTranscript) && (
-              <div
-                style={{
-                  flex: 1,
-                  padding: '12px 16px',
-                  backgroundColor: '#F8FAFC',
-                  border: '2px solid #E2E8F0',
-                  borderRadius: '12px',
-                  fontSize: '14px',
-                  color: '#64748B',
-                  minHeight: '60px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center'
-                }}
-              >
-                <div style={{ 
-                  fontSize: '12px', 
-                  fontWeight: '600', 
-                  marginBottom: '6px', 
-                  color: '#475569',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <span>
-                    Transcription: 
-                    {isRecording && (
-                      <span style={{ color: '#3B82F6', marginLeft: '6px' }}>🎤</span>
-                    )}
-                  </span>
-                </div>
-                <div style={{ textAlign: 'left' }}>
-                  {/* Show accumulated transcript in normal style */}
-                  {accumulatedTranscript && (
-                    <span style={{ fontStyle: 'normal', color: '#374151' }}>
-                      {accumulatedTranscript}
-                    </span>
-                  )}
-                  {/* Show current live transcript in italic */}
-                  {liveTranscript && (
-                    <span style={{ fontStyle: 'italic', color: '#64748B' }}>
-                      {accumulatedTranscript ? ' ' : ''}{liveTranscript}
-                    </span>
-                  )}
-                  {/* Show listening indicator if no transcript yet */}
-                  {!accumulatedTranscript && !liveTranscript && isRecording && 'Listening...'}
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Page number */}
           <div
@@ -568,13 +509,16 @@ export const Spread: React.FC<SpreadProps> = ({
             <div 
               style={{
                 fontFamily: '"Georgia", "Times New Roman", serif',
-                fontSize: '32px',
-                lineHeight: '1.7',
+                fontSize: 'clamp(18px, 2.2vw, 26px)', // Responsive font size
+                lineHeight: 'clamp(1.5, 1.6, 1.7)', // Responsive line height
                 color: '#1a202c',
-                maxWidth: '46ch',
+                maxWidth: 'clamp(35ch, 45ch, 50ch)', // Responsive max width
                 textAlign: 'center',
                 letterSpacing: '0.01em',
-                fontWeight: '400'
+                fontWeight: '400',
+                textWrap: 'balance', // Better line breaks
+                hyphens: 'auto', // Handle long words
+                overflowWrap: 'anywhere' // Prevent overflow
               }}
             >
               {nextPage.right.dropCap ? (
@@ -582,10 +526,10 @@ export const Spread: React.FC<SpreadProps> = ({
                   <span
                     style={{
                       float: 'left',
-                      fontSize: '5.6em',
+                      fontSize: 'clamp(3.5em, 8vw, 5.6em)', // Responsive drop cap
                       lineHeight: '0.75',
-                      marginRight: '10px',
-                      marginTop: '8px',
+                      marginRight: 'clamp(6px, 2vw, 10px)', // Responsive margin
+                      marginTop: 'clamp(4px, 1.5vw, 8px)', // Responsive margin
                       fontWeight: '500',
                       color: '#2d3748',
                       fontFamily: '"Georgia", "Times New Roman", serif'

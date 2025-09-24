@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Spread } from './Spread';
 import { KaraokeEnding } from './KaraokeEnding';
 import { StoryPage, FinalPage } from '@/data/storyPages';
@@ -12,6 +12,8 @@ interface BookProps {
   pageSoundsEnabled?: boolean;
   readOnlyMode?: boolean;
   className?: string;
+  externalReadingAccuracy?: number | null;
+  externalIsRecording?: boolean;
 }
 
 export const Book: React.FC<BookProps> = ({
@@ -21,10 +23,21 @@ export const Book: React.FC<BookProps> = ({
   highlightedWordIndex = -1,
   pageSoundsEnabled = false,
   readOnlyMode = false,
-  className = ''
+  className = '',
+  externalReadingAccuracy = null,
+  externalIsRecording = false
 }) => {
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipDirection, setFlipDirection] = useState<'next' | 'prev'>('next');
+  const [screenWidth, setScreenWidth] = useState(1024); // Default to desktop
+
+  // Track screen width for responsive aspect ratio
+  useEffect(() => {
+    const updateScreenWidth = () => setScreenWidth(window.innerWidth);
+    updateScreenWidth(); // Set initial value
+    window.addEventListener('resize', updateScreenWidth);
+    return () => window.removeEventListener('resize', updateScreenWidth);
+  }, []);
 
   const currentPage = pages[currentPageIndex];
   const nextPage = pages[currentPageIndex + 1];
@@ -109,17 +122,17 @@ export const Book: React.FC<BookProps> = ({
     <div 
       className={`book-container ${className}`}
        style={{
-         perspective: '1600px',
+         perspective: 'clamp(800px, 100vw, 1600px)',
          perspectiveOrigin: 'center center',
-         width: '90vw', // Use 90% of viewport width
-         maxWidth: '3500px', // Even larger maximum
-         minWidth: '800px', // Larger minimum
-         aspectRatio: '30/12', // Wide panoramic aspect ratio (1.78:1)
+         width: '100%', // Full width of container
+         maxWidth: '1200px', // Reasonable max width for readability
+         minWidth: '320px', // Minimum for mobile
+         aspectRatio: screenWidth >= 1024 ? '30/12' : screenWidth >= 768 ? '24/12' : '20/12', // Responsive aspect ratio
          margin: '0 auto',
          cursor: isFlipping ? 'wait' : 'pointer',
          position: 'relative',
-         filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3))',
-         borderRadius: '28px',
+         filter: 'drop-shadow(0 clamp(8px, 2vw, 20px) clamp(16px, 4vw, 40px) rgba(0, 0, 0, 0.3))',
+         borderRadius: 'clamp(12px, 3vw, 28px)',
          background: `
            linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
            linear-gradient(45deg, rgba(0, 0, 0, 0.05) 0%, transparent 100%)
@@ -170,6 +183,8 @@ export const Book: React.FC<BookProps> = ({
           pageNumber={currentPageIndex + 1}
           totalPages={pages.length}
           readOnlyMode={readOnlyMode}
+          externalReadingAccuracy={externalReadingAccuracy}
+          externalIsRecording={externalIsRecording}
         />
       </div>
       

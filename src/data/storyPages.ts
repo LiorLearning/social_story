@@ -131,8 +131,8 @@ export const storyBooks: Record<string, StoryBook> = {
         alt: "Reese and Oli riding the geyser dragon through silver mist",
         title: "Karaoke Ending",
         subtitle: "Reese & Oli",
-        text: "The geyser dragon's eyes warmed. Wings unfurled, scattering moonlit mist. Below, eggs glittered like stars fallen into earth. The valley would wake soon.",
-        audio: null
+        text: "Intro. Valley calls us now, can you feel the sound? (whoa oh) Verse 1. Night drapes Yellowstone, steam wakes the pines Buffalo Dragons hum, courage in our minds Oli hesitates but Reese ignites the flame \"Hand in hand we stand—forever unafraid\" Build. Ground starts to tremble, geysers roar Our hearts beat louder than ever before Chorus. Run to the light, to the edge of the lake Valley's heart awakens—feel how it shakes Hand in hand, we rise, fearless and brave We ride the song those geysers made (ride the song the geysers made) Verse 2. Colors blaze in steam—blue, green, then red Cracks of life appear where the cold once spread Shells break open wide, new wings touch the sky Lantern eyes ignite—a brand-new light Build 2. Rhythms of the earth, a rising drum Count with me now—our time has come Bridge. Lead: One! Crowd: One! Lead: Two! Crowd: Two! Lead: Three! Crowd: Three! Raise your voice—let the anthem ring! Final Chorus. Run to the light, to the edge of the lake Valley's heart awakens—feel how it shakes Hand in hand, we rise, fearless and brave We ride the song those geysers made Up we climb, the anthem we've craved United strong, in light we're saved Outro. Peace in our victory, echoes through the night Valley's heartbeat fades until next ride",
+        audio: "/covers/audio/Reese-geyser.mp3"
       }
     ]
   },
@@ -243,17 +243,17 @@ export const storyBooks: Record<string, StoryBook> = {
   },
   "3": {
     id: "3",
-    title: "The Mischievous Teacher",
+    title: "Jilly, and Maddy's school days",
     cover: "/covers/Gaia-School.png",
     pages: [
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "Jill and Maddy entering a dark, eerie school hallway with bloody handprints on lockers" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250923_232144.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "Jill and Maddy approaching Fairview school, a neat brick building with a tall old clock tower" 
         },
         right: {
-          text: "Jill and Maddy stepped into Fairview and stopped. Bloody handprints stained the lockers, and the hallway smelled like iron. Above them, the old clock ticked backward, each jerk louder than the last. Lights hummed; whispers stretched thin. Jill gripped Maddy's sleeve. \"This isn't our normal school,\" she said. \"It wants us to notice.\"",
+          text: "Jill and Maddy start at Fairview, a neat brick school with a tall old clock. Inside, the clock ticks backward. Rusty-red handprints smear two lockers. Jill whispers, \"Something here wants to be seen.\"",
           dropCap: true,
           audio: null
         }
@@ -261,110 +261,132 @@ export const storyBooks: Record<string, StoryBook> = {
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "Miss Thornton with an unnaturally wide smile and unblinking eyes" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250923_232347.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "Miss Thornton greeting the class with a warm smile but cold, unblinking eyes" 
         },
         right: {
-          text: "\"Good morning,\" Miss Thornton sang, cardigan neat, bun tight. Her smile looked warm, but her eyes didn't blink. The lights flickered; a cold draft slid by. \"Don't be late,\" she said, watching too closely. Jill forced a smile back. The building felt like it was listening. Jill thought: She knows we know.",
+          text: "Miss Thornton—soft cardigan, bright smile—greets the class. Her smile is warm; her eyes aren't. When the bell rings, the lights hum like bees. Jill feels the building listening.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "Jill finding threatening notes in her desk and math book" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250923_232610.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "Jill discovering mysterious folded notes in her desk and math book" 
         },
         right: {
-          text: "Jill opened her desk. A note flipped out: \"LOSER 102.\" Another hid in her math book: \"LOOK AWAY.\" Not warnings—dares pressed so hard the paper tore. Maddy mouthed, What is it? Jill showed both slips, hands shaking. The backward clock kept ticking—steady, wrong, relentless—as if counting down to them.",
+          text: "A folded slip drops from Jill's desk: **LOSER 102**. Another hides in her math book: **LOOK AWAY**. Maddy squeezes her hand. Jill says, \"Nope. We look closer.\"",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "Miss Thornton's phone screen showing a sinister message" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250923_232813.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "Miss Thornton's phone screen briefly showing a sinister message" 
         },
         right: {
-          text: "Pencils scratched. Miss Thornton's phone buzzed three times. Its glow carved sharp shadows across her face. Maddy glanced—then froze. On the screen: \"Did you get the kid?\" A job, not a joke. The screen locked; the teacher scanned the room, pausing on them. Air thinned. A plan was running, and they were inside it.",
+          text: "Miss Thornton's phone buzzes—three sharp taps. For a breath, the screen shows: **Did you get the kid?** The phone locks; the smile returns. Jill and Maddy know it wasn't a joke.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "A trapdoor in the classroom floor revealing glowing green substance below" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250923_233353.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "Empty classroom after lunch with the backward clock ticking louder" 
         },
         right: {
-          text: "The floor creaked like something below was breathing. Jill's sneaker tapped; a board lifted. She pried it open. A sour, metallic smell rose as green goo pulsed slowly, heartbeat-bright. Carved symbols ringed the hole, faintly glowing. \"Close it,\" Maddy whispered. Jill couldn't. Her flashlight shook. This wasn't storage. It was a path.",
+          text: "After lunch, two younger kids don't come back from recess. Teachers say, \"Early pickup.\" The backward clock jerks louder. Jill and Maddy decide to follow Miss Thornton after school.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "Miss Thornton's cane transforming into a living snake with golden eyes" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250923_234547.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "A trapdoor in Room 12 with glowing green light and mysterious symbols" 
         },
         right: {
-          text: "The door slammed. Miss Thornton stood in the flicker-light, cane tapping. Wood rippled; the handle peeled into scales. A snake uncoiled—fangs white, eyes gold. Hiss—long and glassy. Desks scraped; someone screamed. \"Meet Snappy,\" she said, stroking its head. Not a pet—a partner. Below, the trapdoor glowed. Miss Thornton had moved first.",
+          text: "In Room 12, the floorboards breathe. Jill's sneaker finds a loose plank; green glow leaks through. Symbols circle a trapdoor like tiny stars. They lift it and climb down.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "Jane bravely confronting the snake as it coils around her arm" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250923_234636.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "Underground tunnel with pipes, gadgets, and a mysterious cane that transforms into a silver snake" 
         },
         right: {
-          text: "Everyone shrank back. Jane stepped forward. Snappy lunged; she lifted her arm. The snake coiled tight—cold, fast, shining—then stilled. It looked into her eyes and quieted. Miss Thornton's smile cracked; control slipped. \"Good,\" Jane whispered, stroking living metal. Snappy settled like a bracelet. For the first time today, hope breathed.",
+          text: "A tunnel of pipes, a table of gadgets, a cage with stickers from field trips. A cane leans on the wall; its wood ripples and becomes a silver snake. It hisses, then curls around Jill's wrist like a cold bracelet. \"Snappy,\" Maddy names it. Snappy nods.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "The children running through a corridor of mirrors showing distorted reflections" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250923_234802.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "Miss Thornton in the shadows speaking on her phone while doors seal shut" 
         },
         right: {
-          text: "They ran, a door splintered, and a corridor of mirrors glowed. Light swam in the glass like trapped water. Jill's father appeared, arms open—then melted into Miss Thornton's grin. Whispers slid: Stay… forever. Reflections multiplied—offset, wrong. The floor felt icy though dry. Snappy tightened around Jane's arm, hissing—the only honest sound.",
+          text: "Miss Thornton steps from the shadows, phone to her ear. \"We deliver before midnight,\" she says. \"The Boss hates delays.\" She snaps her fingers; doors seal. Desks above grind into place like a lid.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "Two versions of Miss Thornton emerging from mirrors - one kind, one evil" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250924_001147.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "A hall of mirrors with multiple reflections and two different versions of Miss Thornton" 
         },
         right: {
-          text: "The glass rippled; two Miss Thorntons stepped out. One kind, hands open. One smiling with too many teeth, eyes red. \"Children,\" said one. \"Come,\" said the other. Together: \"Choose.\" Jill trembled. Pick wrong, stay forever. Snappy watched the cruel one, unblinking. Shadows bent the wrong way. \"Trust him,\" Jill whispered.",
+          text: "Snappy leads them into a side passage—glass walls, whispering voices. Reflections make ten Jills, ten Maddys, and two Miss Thorntons. One Miss Thornton is kind with open hands. The other smiles too wide.",
           audio: null
         }
       },
       {
         type: "spread",
         left: { 
-          image: "/covers/Gaia-School.png", 
-          alt: "The children escaping through a final door as the school crumbles behind them" 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250924_001420.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "The two Miss Thorntons confronting the children, forcing them to choose" 
         },
         right: {
-          text: "Lightning-quick, Snappy struck. Glass burst into stars; the cruel one reeled. The maze cracked, seams glowing white. \"Go!\" Jane shouted. They sprinted through bending halls to a final door—night air, cold and real. A bus idled; doors sealed behind them. Safe… maybe. In the window's reflection, Miss Thornton smiled. Far behind, a green heartbeat counted backward.",
+          text: "\"Children,\" both say. \"Choose.\" Jill remembers the texts, the missing kids, the sealed doors. She trusts the one Snappy stares at without blinking—**not** the wide smile. \"Now,\" Jill says. They run past the real one while Snappy strikes.",
+          audio: null
+        }
+      },
+      {
+        type: "spread",
+        left: { 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250924_001649.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "Glass shattering like stars as the children escape through a final door to a waiting bus" 
+        },
+        right: {
+          text: "Glass bursts like stars. They shove a final door; night air rushes in, cold and honest. A bus idles at the curb—driver waiting, frightened, but brave. They pile in, shouting for help as the doors hiss shut.",
+          audio: null
+        }
+      },
+      {
+        type: "spread",
+        left: { 
+          image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250924_002651.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN", 
+          alt: "Police cars surrounding the school in the morning while Miss Thornton is taken away still smiling" 
+        },
+        right: {
+          text: "Police swarm the school by morning. Miss Thornton is taken away, smiling the whole time. Jill and Maddy hug their parents—and keep Snappy hidden under Jill's sleeve. That night the old clock in Jill's hallway ticks… backward. On her window, a fresh note glows green: **SEE YOU SOON.**",
           audio: null
         }
       },
       {
         type: "final",
-        image: "/covers/Gaia-School.png",
-        alt: "The children escaping through a final door as the school crumbles behind them",
+        image: "https://tutor.mathkraft.org/_next/image?url=%2Fapi%2Fproxy%3Furl%3Dhttps%253A%252F%252Fd1ptidrpttdm41.cloudfront.net%252Ftestuser%252F20250924_002651.png&w=3840&q=75&dpl=dpl_2uGXzhZZsLneniBZtsxr7PEabQXN",
+        alt: "Jill and Maddy safe at home with Snappy hidden, but a glowing green note on the window",
         title: "Karaoke Ending",
-        subtitle: "The Mischievous Teacher",
-        text: "Lightning-quick, Snappy struck. Glass burst into stars. They sprinted through bending halls to a final door. Safe… maybe.",
-        audio: null
+        subtitle: "Jilly, and Maddy's school days",
+        text: "Verse 1. Tick… tick… backward… clock. There's dust in the light and a hallway that listens, Notes in the margins—\"Loser one-oh-two.\" \"Look away,\" they said—so we didn't. Verse 2. We looked closer. We found the truth. A smile at the door that never reached the eyes, A phone that whispered, \"Did you get the kid?\" Under floorboards—green glow, secret signs. Chorus. Backward clock, we're counting brave not time, Hand in hand, through mirrors and the lies. When the doors slam shut, we still find the line: If fear says \"go,\" our hearts say \"Not tonight.\" Bracelet snake with amber eyes, Chooses light when shadows rise, Bus lights warm the freezing night— Hold on tight. We'll make it right. Chorus Reprise & Outro. Backward clock, we're counting brave not time, Glass like stars—We won't look away this time. See you soon.",
+        audio: "/covers/audio/Jill-maddy.mp3"
       }
     ]
   },
