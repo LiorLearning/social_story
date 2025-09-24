@@ -12,87 +12,158 @@ export const KaraokeEnding: React.FC<KaraokeEndingProps> = ({ page }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isLooping, setIsLooping] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
+  const [transcribedText, setTranscribedText] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lyricsContainerRef = useRef<HTMLDivElement | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
 
-  // Split text into lines (sentences)
+  // Split text into lines and words for highlighting
   const lines = page.text.split(/[.!?]+/).filter(line => line.trim().length > 0).map(line => line.trim());
-
-  // Define precise timestamps for each section based on your timing
-  const sectionTimestamps = [
-    { start: 0, end: 13, name: "Verse 1" },      // 0:00 - 0:13
-    { start: 14, end: 32, name: "Chorus 1" },    // 0:14 - 0:32
-    { start: 33, end: 47, name: "Verse 2" },     // 0:33 - 0:47
-    { start: 48, end: 69, name: "Chorus 2" },    // 0:48 - 1:09
-    { start: 70, end: 83, name: "Bridge" },      // 1:10 - 1:23
-    { start: 84, end: 104, name: "Final Chorus" } // 1:24 - end
-  ];
-
-  // Map lines to their corresponding sections (based on the lyrics structure)
-  const lineToSection = [
-    0, // "Verse 1"
-    0, 0, 0, 0, // Verse 1 lines (4 lines)
-    1, // "Chorus"
-    1, 1, 1, 1, // Chorus 1 lines (4 lines)
-    2, // "Verse 2"
-    2, 2, 2, 2, // Verse 2 lines (4 lines)
-    3, // "Chorus"
-    3, 3, 3, 3, // Chorus 2 lines (4 lines)
-    4, // "Bridge"
-    4, 4, 4, 4, // Bridge lines (4 lines)
-    5, // "Final Chorus"
-    5, 5, 5, 5  // Final Chorus lines (4 lines)
-  ];
-
-  const getCurrentLineIndex = (currentTime: number) => {
-    // Find which section we're in
-    let currentSection = -1;
-    for (let i = 0; i < sectionTimestamps.length; i++) {
-      if (currentTime >= sectionTimestamps[i].start && currentTime <= sectionTimestamps[i].end) {
-        currentSection = i;
-        break;
-      }
+  const allWords = page.text.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(word => word.length > 0);
+  
+  // Initialize speech recognition
+  const initializeSpeechRecognition = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.warn('Speech recognition not supported');
+      return null;
     }
 
-    if (currentSection === -1) {
-      // If we're past all sections, show the last line
-      if (currentTime > sectionTimestamps[sectionTimestamps.length - 1].end) {
-        return lines.length - 1;
-      }
-      return 0;
-    }
-
-    // Find the first line of this section
-    let sectionStartLine = 0;
-    for (let i = 0; i < lineToSection.length; i++) {
-      if (lineToSection[i] === currentSection) {
-        sectionStartLine = i;
-        break;
-      }
-    }
-
-    // Count lines in this section
-    let sectionLineCount = 0;
-    for (let i = 0; i < lineToSection.length; i++) {
-      if (lineToSection[i] === currentSection) {
-        sectionLineCount++;
-      }
-    }
-
-    // Calculate progress within the section
-    const sectionDuration = sectionTimestamps[currentSection].end - sectionTimestamps[currentSection].start;
-    const timeInSection = currentTime - sectionTimestamps[currentSection].start;
-    const progressInSection = Math.min(Math.max(timeInSection / sectionDuration, 0), 1);
-
-    // Calculate which line within the section
-    const lineInSection = Math.floor(progressInSection * sectionLineCount);
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
     
-    return Math.min(sectionStartLine + lineInSection, lines.length - 1);
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+    
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      
+      const currentTranscript = (finalTranscript + interimTranscript).toLowerCase();
+      setTranscribedText(currentTranscript);
+      
+      // Find matching words and highlight accordingly
+      const transcriptWords = currentTranscript.replace(/[^\w\s]/g, ' ').split(/\s+/).filter(word => word.length > 0);
+      
+      // Find the best match position in our lyrics
+      let bestMatch = 0;
+      let maxMatches = 0;
+      
+      for (let i = 0; i <= allWords.length - transcriptWords.length; i++) {
+        let matches = 0;
+        for (let j = 0; j < Math.min(transcriptWords.length, 5); j++) { // Check last 5 words
+          const transcriptWord = transcriptWords[transcriptWords.length - 1 - j];
+          const lyricWord = allWords[i + transcriptWords.length - 1 - j];
+          if (transcriptWord && lyricWord && lyricWord.includes(transcriptWord.substring(0, 3))) {
+            matches++;
+          }
+        }
+        if (matches > maxMatches) {
+          maxMatches = matches;
+          bestMatch = i + transcriptWords.length - 1;
+        }
+      }
+      
+      if (maxMatches > 0) {
+        setCurrentWordIndex(bestMatch);
+        
+        // Update current line based on word position
+        let wordCount = 0;
+        let newLineIndex = 0;
+        for (let i = 0; i < lines.length; i++) {
+          const lineWords = lines[i].toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(word => word.length > 0);
+          if (wordCount + lineWords.length > bestMatch) {
+            newLineIndex = i;
+            break;
+          }
+          wordCount += lineWords.length;
+        }
+        setCurrentLineIndex(newLineIndex);
+      }
+    };
+    
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+    };
+    
+    recognition.onend = () => {
+      setIsListening(false);
+      // Restart if audio is still playing
+      if (isPlaying && audioRef.current && !audioRef.current.paused) {
+        setTimeout(() => {
+          if (recognitionRef.current && isPlaying) {
+            try {
+              recognitionRef.current.start();
+            } catch (e) {
+              console.warn('Could not restart recognition:', e);
+            }
+          }
+        }, 100);
+      }
+    };
+    
+    return recognition;
   };
 
-  // Initialize audio
+  // Helper function to render lyrics with word-level highlighting
+  const renderLyricsWithHighlighting = (line: string, lineIndex: number) => {
+    const words = line.split(/(\s+)/); // Split but keep whitespace
+    let globalWordIndex = 0;
+    
+    // Calculate the starting word index for this line
+    for (let i = 0; i < lineIndex; i++) {
+      const lineWords = lines[i].toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(word => word.length > 0);
+      globalWordIndex += lineWords.length;
+    }
+    
+    return words.map((word, wordIndex) => {
+      const isWord = /\w/.test(word);
+      if (!isWord) {
+        return <span key={wordIndex}>{word}</span>;
+      }
+      
+      const currentGlobalIndex = globalWordIndex + Math.floor(wordIndex / 2); // Approximate since we have spaces
+      const isHighlighted = currentGlobalIndex <= currentWordIndex;
+      
+      return (
+        <span
+          key={wordIndex}
+          style={{
+            backgroundColor: isHighlighted ? '#fef3c7' : 'transparent',
+            color: isHighlighted ? '#92400e' : 'inherit',
+            fontWeight: isHighlighted ? '600' : 'inherit',
+            padding: isHighlighted ? '2px 4px' : '0',
+            borderRadius: isHighlighted ? '4px' : '0',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          {word}
+        </span>
+      );
+    });
+  };
+
+  // Initialize audio and speech recognition
   useEffect(() => {
     if (page.audio) {
       const audio = new Audio(page.audio);
@@ -102,49 +173,77 @@ export const KaraokeEnding: React.FC<KaraokeEndingProps> = ({ page }) => {
         setDuration(audio.duration);
       };
 
+      const handleError = (e: any) => {
+        console.error('Audio loading error:', e);
+      };
+
       const handleTimeUpdate = () => {
         setCurrentTime(audio.currentTime);
-        
-        // Use precise timing to determine current line
-        const newLineIndex = getCurrentLineIndex(audio.currentTime);
-        
-        if (newLineIndex !== currentLineIndex) {
-          setCurrentLineIndex(newLineIndex);
-          
-          // Auto-scroll to keep current line visible
-          if (lyricsContainerRef.current) {
-            const activeLineElement = lyricsContainerRef.current.children[newLineIndex] as HTMLElement;
-            if (activeLineElement) {
-              activeLineElement.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-                inline: 'nearest'
-              });
+      };
+
+      const handlePlay = () => {
+        setIsPlaying(true);
+        // Start speech recognition when audio starts (optional)
+        setTimeout(() => {
+          try {
+            if (!recognitionRef.current) {
+              recognitionRef.current = initializeSpeechRecognition();
             }
+            if (recognitionRef.current && !isListening) {
+              recognitionRef.current.start();
+            }
+          } catch (e) {
+            console.warn('Speech recognition not available or failed to start:', e);
+            // Continue without speech recognition
+          }
+        }, 100);
+      };
+
+      const handlePause = () => {
+        setIsPlaying(false);
+        // Stop speech recognition when audio pauses
+        if (recognitionRef.current && isListening) {
+          try {
+            recognitionRef.current.stop();
+          } catch (e) {
+            console.warn('Could not stop speech recognition:', e);
           }
         }
       };
 
       const handleEnded = () => {
         setIsPlaying(false);
+        // Stop speech recognition when audio ends
+        if (recognitionRef.current && isListening) {
+          try {
+            recognitionRef.current.stop();
+          } catch (e) {
+            console.warn('Could not stop speech recognition:', e);
+          }
+        }
+        
         if (isLooping) {
           audio.currentTime = 0;
+          setCurrentTime(0);
+          setCurrentLineIndex(0);
+          setCurrentWordIndex(0);
+          setTranscribedText('');
           audio.play();
           setIsPlaying(true);
         } else {
           setCurrentTime(0);
           setCurrentLineIndex(0);
+          setCurrentWordIndex(0);
+          setTranscribedText('');
         }
       };
-
-      const handlePlay = () => setIsPlaying(true);
-      const handlePause = () => setIsPlaying(false);
 
       audio.addEventListener('loadedmetadata', handleLoadedMetadata);
       audio.addEventListener('timeupdate', handleTimeUpdate);
       audio.addEventListener('ended', handleEnded);
       audio.addEventListener('play', handlePlay);
       audio.addEventListener('pause', handlePause);
+      audio.addEventListener('error', handleError);
 
       return () => {
         audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -152,20 +251,44 @@ export const KaraokeEnding: React.FC<KaraokeEndingProps> = ({ page }) => {
         audio.removeEventListener('ended', handleEnded);
         audio.removeEventListener('play', handlePlay);
         audio.removeEventListener('pause', handlePause);
+        audio.removeEventListener('error', handleError);
         audio.pause();
+        
+        // Clean up speech recognition
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.stop();
+          } catch (e) {
+            console.warn('Could not stop speech recognition on cleanup:', e);
+          }
+          recognitionRef.current = null;
+        }
       };
     }
-  }, [page.audio, lines.length, isLooping]);
+  }, [page.audio, isLooping]);
 
-  const handlePlayPause = useCallback(() => {
+  const handlePlayPause = useCallback(async () => {
     if (!audioRef.current || !page.audio) return;
 
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
+    try {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        await audioRef.current.play();
+      }
+    } catch (error) {
+      console.error('Audio playback error:', error);
+      // Reset states if playback fails
+      setIsPlaying(false);
+      if (recognitionRef.current && isListening) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          console.warn('Could not stop speech recognition:', e);
+        }
+      }
     }
-  }, [isPlaying, page.audio]);
+  }, [isPlaying, page.audio, isListening]);
 
   const handleSkipBack = useCallback(() => {
     if (!audioRef.current) return;
@@ -306,16 +429,13 @@ export const KaraokeEnding: React.FC<KaraokeEndingProps> = ({ page }) => {
                   borderRadius: '12px',
                   fontFamily: '"Georgia", "Times New Roman", serif',
                   backgroundColor: hasAudio && currentLineIndex === index 
-                    ? '#fef3c7' 
+                    ? 'rgba(254, 243, 199, 0.3)' 
                     : 'rgba(248, 250, 252, 0.6)',
-                  color: hasAudio && currentLineIndex === index 
-                    ? '#92400e' 
-                    : '#374151',
+                  color: '#374151',
                   border: hasAudio && currentLineIndex === index 
                     ? '3px solid #f59e0b' 
                     : '2px solid rgba(226, 232, 240, 0.8)',
                   transition: 'all 0.4s ease',
-                  fontWeight: hasAudio && currentLineIndex === index ? '600' : '400',
                   boxShadow: hasAudio && currentLineIndex === index 
                     ? '0 8px 25px rgba(245, 158, 11, 0.3)' 
                     : '0 2px 8px rgba(0, 0, 0, 0.05)',
@@ -324,9 +444,36 @@ export const KaraokeEnding: React.FC<KaraokeEndingProps> = ({ page }) => {
                     : 'translateY(0)'
                 }}
               >
-                {line}
+                {hasAudio ? renderLyricsWithHighlighting(line, index) : line}
               </div>
             ))}
+            
+            {/* Audio Status Info */}
+            {hasAudio && (
+              <div style={{
+                marginTop: '20px',
+                padding: '12px',
+                backgroundColor: isPlaying ? 'rgba(34, 197, 94, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                borderRadius: '8px',
+                fontSize: '14px',
+                color: isPlaying ? '#15803d' : '#6b7280',
+                border: `1px solid ${isPlaying ? 'rgba(34, 197, 94, 0.2)' : 'rgba(156, 163, 175, 0.2)'}`
+              }}>
+                <div style={{ marginBottom: '8px', fontWeight: '600' }}>
+                  {isPlaying ? '🎵 Playing' : '⏸️ Paused'} | Duration: {formatTime(duration)}
+                </div>
+                {isListening && (
+                  <div style={{ fontSize: '12px', opacity: 0.8 }}>
+                    🎤 Speech recognition active {transcribedText && `| Last: "${transcribedText.slice(-30)}..."`}
+                  </div>
+                )}
+                {!isListening && isPlaying && (
+                  <div style={{ fontSize: '12px', opacity: 0.8 }}>
+                    💡 Speech recognition not available - using basic playback
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
